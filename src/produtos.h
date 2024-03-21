@@ -31,11 +31,14 @@ typedef struct
 LinhaProdutos criarLinhaProdutos(int codigo, char nome[]);
 int apagaLinhaProdutos(LinhaProdutos *linha);
 
-Produto criarProduto(int codigo, char nome[], char marca[], float peso, float preco, int quantidade);
+Produto criarProduto(int codigo, char* nome, char* marca, float preco, int quantidade);
 Produto* obterProduto(LinhaProdutos* linha, int codigo);
 int adicionarProduto(LinhaProdutos *linha, Produto produto);
 int removerProduto(LinhaProdutos* linha, int codigo);
 int atualizarProduto(LinhaProdutos* linha, Produto produto);
 int numProdutos(LinhaProdutos* linha);
+
+void listarProduto(Produto* produto);
+void listarLinhaProduto(LinhaProdutos* linha);
 
 #endif

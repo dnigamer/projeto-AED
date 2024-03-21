@@ -1,6 +1,10 @@
 #include "produtos.h"
 #include <string.h>
 
+/////////////////////////////////////////////////////////
+// Funções para manipulação de dados
+/////////////////////////////////////////////////////////
+
 // Cria uma nova instância para a linha de produtos
 // Retorna a linha de produtos
 LinhaProdutos criarLinhaProdutos(int codigo, char nome[]) {
@@ -82,6 +86,9 @@ Produto* obterProduto(LinhaProdutos* linha, int codigo) {
     return NULL;                                            // Retorna NULL se o produto não foi encontrado
 }
 
+// Atualiza um produto numa linha de produtos
+// Retorna 0 se o produto foi atualizado com sucesso
+// Retorna 1 se o produto não foi encontrado
 int atualizarProduto(LinhaProdutos* linha, Produto Produto) {
     Node* current = linha->top;                             // Obtém o nó do topo
     if (current == NULL) return 1;                          // Retorna 1 se o nó do topo for NULL
@@ -104,4 +111,34 @@ int numeroProdutos(LinhaProdutos* linha) {
         current = current->next;                            // O próximo nó será o nó atual
     }
     return count;                                           // Retorna o contador
+}
+
+/////////////////////////////////////////////////////////
+// Funções para apresentação de dados
+/////////////////////////////////////////////////////////
+
+// Apresenta os dados de um produto
+void listarProduto(Produto* produto) {
+    printf("+------------------------------------------+\n");
+    printf("| Código:     | %-25d |\n", produto->codigo);                // Apresenta o código do produto
+    printf("+------------------------------------------+\n");
+    printf("| Nome:       | %-25s |\n", produto->nome);                    // Apresenta o nome do produto
+    printf("| Marca:      | %-25s |\n", produto->marca);                  // Apresenta a marca do produto
+    printf("| Preço:      | %-25.2f |\n", produto->preco);                // Apresenta o preço do produto
+    printf("| Quantidade: | %-25d |\n", produto->quantidade);        // Apresenta a quantidade do produto
+    printf("+------------------------------------------+\n");
+}
+
+// Apresenta os dados de uma linha de produtos
+void listarLinhaProduto(LinhaProdutos* linha) {
+    printf("+----------------------------------------+\n");
+    printf("| Código da Linha | %-18d |\n", linha->codigo);
+    printf("| Nome da Linha   | %-18s |\n", linha->nome);
+    printf("+----------------------------------------+\n");
+    Node* current = linha->top;
+    while (current != NULL) {
+        listarProduto(&current->produto);
+        current = current->next;
+    }
+    printf("+----------------------------------------+\n");
 }
