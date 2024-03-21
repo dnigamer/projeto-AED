@@ -1,4 +1,4 @@
-# Trabalho AED 2023/2024
+# Trabalho AED 2023/2024 - UM 2º Semestre
 ## Tema escolhido
 O tema escolhido para o trabalho foi o de sistema de gestão de uma loja de bens essenciais. Outro tema poderia ter sido escolhido, como o desenvolvimento de um jogo. <br/>
 Porém, o tema escolhido foi o de uma loja de bens essenciais por facilidade de implementação e por ser um tema que pode ser facilmente implementado para um ambiente real.
