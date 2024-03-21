@@ -21,7 +21,7 @@ Mais concretamente, para além do objetivo geral do trabalho, deve ser considera
 4. Permitir inserir novos elementos e eliminar;
 5. Aplicar estratégias de pesquisa, ordenação e apresentação de informação (por exemplo, converter estrutura dinâmica para vetor e aplicar quick sort);
 6. Produzir saídas que reflitam cuidado no visual na apresentação de conteúdos e dados.
-7. Codificar refletindo cuidado na organização do código (main, funções e bibliotecas .h criadas para seccionar grupos funcionalidades, etc.).
+7. Codificar refletindo cuidado na organização do código (main, funções e bibliotecas .h criadas para seccionar grupos, funcionalidades, etc.).
 
 Como funcionalidades extra, podem ser consideradas as seguintes opções, que podem ser valorizadas na avaliação do trabalho:
 1. Exploração de mais do que 1 estrutura dinâmica;
