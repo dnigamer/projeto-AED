@@ -35,5 +35,7 @@ Produto criarProduto(int codigo, char nome[], char marca[], float peso, float pr
 Produto* obterProduto(LinhaProdutos* linha, int codigo);
 int adicionarProduto(LinhaProdutos *linha, Produto produto);
 int removerProduto(LinhaProdutos* linha, int codigo);
+int atualizarProduto(LinhaProdutos* linha, Produto produto);
+int numProdutos(LinhaProdutos* linha);
 
 #endif
