@@ -36,7 +36,7 @@ Produto* obterProduto(LinhaProdutos* linha, int codigo);
 int adicionarProduto(LinhaProdutos *linha, Produto produto);
 int removerProduto(LinhaProdutos* linha, int codigo);
 int atualizarProduto(LinhaProdutos* linha, Produto produto);
-int numProdutos(LinhaProdutos* linha);
+int numeroProdutos(LinhaProdutos* linha);
 
 void listarProduto(Produto* produto);
 void listarLinhaProduto(LinhaProdutos* linha);
