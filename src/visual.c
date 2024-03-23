@@ -1,128 +1,121 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "inputhelper.h"
-#include "visual.h"
 
-void productsMenu() {
-    char opt;
-    int invalid = 0;
+#if defined(_WIN32) || defined(_WIN64)
+#define CLEAR "cls"
+#else
+#define CLEAR "clear"
+#endif
+
+// Products menu
+int productsMenu() {
+    char pick;
+
+    system(CLEAR);
+    printf("+----------------------------------------+\n");
+    printf("| Escolha uma opção:                     |\n");
+    printf("+----------------------------------------+\n");
+    printf("| 1. Adicionar um produto                |\n");
+    printf("| 2. Remover um produto                  |\n");
+    printf("| 3. Editar um produto                   |\n");
+    printf("| 4. Mostrar produto                     |\n");
+    printf("| 5. Procurar um produto                 |\n");
+    printf("|                                        |\n");
+    printf("| 0. Voltar                              |\n");
+    printf("+----------------------------------------+\n");
+
     do {
-        system(CLEAR); // limpa a tela (adaptado para Windows: ver visual.h)
-        printf("+----------------------------------------+\n");
-        printf("| Escolha uma opção:                     |\n");
-        printf("+----------------------------------------+\n");
-        printf("| 1. Adicionar um produto                |\n");
-        printf("| 2. Remover um produto                  |\n");
-        printf("| 3. Editar um produto                   |\n");
-        printf("| 4. Mostrar produto                     |\n");
-        printf("| 5. Procurar um produto                 |\n");
-        printf("|                                        |\n");
-        printf("| 0. Voltar                              |\n");
-        printf("+----------------------------------------+\n");
-        if (invalid) {
-            printf("Opção inválida!\n");
-        }
-        opt = getch();
-        switch (opt) {
+        pick = getch();
+        switch (pick) {
             case '1':
-                printf("Adicionar produto\n");
-                break;
+                return 1;
             case '2':
-                printf("Remover produto\n");
-                break;
+                return 2;
             case '3':
-                printf("Editar produto\n");
-                break;
+                return 3;
             case '4':
-                printf("Mostrar produto\n");
-                break;
+                return 4;
             case '5':
-                printf("Procurar um produto\n");
-                break;
+                return 5;
             case '0':
-                break;
+                return 0;
             default:
-                invalid = 1;
                 break;
         }
-    } while (opt != '0');
+    } while (1);
 }
 
 // Lists menu
-void listsMenu() {
-    char opt;
-    int invalid = 0;
+int listsMenu() {
+    char pick;
+
+    system(CLEAR);
+    printf("+----------------------------------------+\n");
+    printf("| Escolha uma opção:                     |\n");
+    printf("+----------------------------------------+\n");
+    printf("| 1. Adicionar uma nova linha            |\n");
+    printf("| 2. Remover uma linha                   |\n");
+    printf("| 3. Editar uma linha                    |\n");
+    printf("| 4. Mostrar uma linha                   |\n");
+    printf("| 5. Mostrar todas as linhas             |\n");
+    printf("| 6. Mostrar número total de linhas      |\n");
+    printf("|                                        |\n");
+    printf("| 0. Voltar                              |\n");
+    printf("+----------------------------------------+\n");
+
     do {
-        system(CLEAR);
-        printf("+----------------------------------------+\n");
-        printf("| Escolha uma opção:                     |\n");
-        printf("+----------------------------------------+\n");
-        printf("| 1. Adicionar uma nova linha            |\n");
-        printf("| 2. Remover uma linha                   |\n");
-        printf("| 3. Editar uma linha                    |\n");
-        printf("| 4. Mostrar uma linha                   |\n");
-        printf("| 5. Mostrar todas as linhas             |\n");
-        printf("| 6. Mostrar número total de linhas      |\n");
-        printf("|                                        |\n");
-        printf("| 0. Voltar                              |\n");
-        printf("+----------------------------------------+\n");
-        if (invalid) {
-            printf("Opção inválida!\n");
-        }
-        opt = getch();
-        switch (opt) {
+        pick = getch();
+        switch (pick) {
             case '1':
-                printf("Adicionar linha\n");
-                break;
+                return 1;
             case '2':
-                printf("Remover linha\n");
-                break;
+                return 2;
             case '3':
-                printf("Editar linha\n");
-                break;
+                return 3;
+            case '4':
+                return 4;
+            case '5':
+                return 5;
+            case '6':
+                return 6;
             case '0':
-                break;
+                return 0;
             default:
-                invalid = 1;
                 break;
         }
-    } while (opt != '0');
+    } while (1);
 }
 
 // Main menu
-void mainMenu() {
-    char opt;
-    int invalid = 0;
+int mainMenu() {
+    char pick;
+
+    system(CLEAR);
+    printf("+----------------------------------------+\n");
+    printf("| Bem-vindo ao sistema de produtos!      |\n");
+    printf("+----------------------------------------+\n\n");
+    printf("+----------------------------------------+\n");
+    printf("| Escolha uma opção:                     |\n");
+    printf("+----------------------------------------+\n");
+    printf("| 1. Opções sobre produtos               |\n");
+    printf("| 2. Opções sobre linhas                 |\n");
+    printf("|                                        |\n");
+    printf("| 0. Sair                                |\n");
+    printf("+----------------------------------------+\n");
+
     do {
-        system(CLEAR);
-        printf("+----------------------------------------+\n");
-        printf("| Bem-vindo ao sistema de produtos!      |\n");
-        printf("+----------------------------------------+\n\n");
-        printf("+----------------------------------------+\n");
-        printf("| Escolha uma opção:                     |\n");
-        printf("+----------------------------------------+\n");
-        printf("| 1. Opções sobre produtos               |\n");
-        printf("| 2. Opções sobre linhas                 |\n");
-        printf("|                                        |\n");
-        printf("| 0. Sair                                |\n");
-        printf("+----------------------------------------+\n");
-        if (invalid) {
-            printf("Opção inválida!\n");
-        }
-        opt = getch();
-        switch (opt) {
+        pick = getch();
+        switch (pick) {
             case '1':
-                productsMenu();
-                break;
+                return 1;
             case '2':
-                listsMenu();
-                break;
+                return 2;
             case '0':
-                printf("Até logo!\n");
-                break;
+                return 0;
             default:
-                invalid = 1;
                 break;
         }
-    } while (opt != '0');
+    } while (1);
+
 }
