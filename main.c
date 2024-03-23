@@ -24,25 +24,18 @@ void initmenu(int* tipo, int* operation) {
         *tipo = mainMenu();
         switch(*tipo) {
             case 1:
-                *tipo = 1;
                 temp = productsMenu();
-                if (temp == 0) {
-                    *operation = 0;
+                if (temp == 0)
                     break;
-                }
                 *operation = temp;
                 return;
             case 2:
-                *tipo = 2;
                 temp = listsMenu();
-                if (temp == 0) {
-                    *operation = 0;
+                if (temp == 0)
                     break;
-                }
                 *operation = temp;
                 return;
             case 0:
-                *tipo = 0;
                 *operation = 0;
                 return;
             default:
