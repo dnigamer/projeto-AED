@@ -29,11 +29,12 @@ int apagaLinhaProdutos(LinhaProdutos* linha) {
 
 // Cria um novo produto usando os parâmetros fornecidos
 // Retorna o produto
-Produto criarProduto(int codigo, char* nome, char* marca, float preco, int quantidade) {
+Produto criarProduto(int codigo, char* nome, char* marca, float peso, float preco, int quantidade) {
     Produto p;                                              // Cria uma nova instância para o produto
     p.codigo = codigo;                                      // Atribui o código ao produto
     strncpy(p.nome, nome, 50);                              // Atribui o nome ao produto
     strncpy(p.marca, marca, 50);                            // Atribui a marca ao produto
+    p.peso = peso;                                          // Atribui o peso ao produto
     p.preco = preco;                                        // Atribui o preço ao produto
     p.quantidade = quantidade;                              // Atribui a quantidade ao produto
     return p;                                               // Retorna o produto
@@ -43,7 +44,7 @@ Produto criarProduto(int codigo, char* nome, char* marca, float preco, int quant
 // Retorna 0 se o produto foi adicionado com sucesso
 // Retorna 1 se houve um erro ao alocar memória
 int adicionarProduto(LinhaProdutos* linha, Produto produto) {  
-    Node* novo_node = (Node*) malloc(sizeof(Node));         // Aloca memória para um novo nó
+    Node* novo_node = (Node*) malloc(sizeof(Node));    // Aloca memória para um novo nó
     if (novo_node == NULL) return 1;                        // Retorna 1 se houve um erro ao alocar memória
     novo_node->produto = produto;                           // Atribui o produto ao novo nó
     novo_node->next = linha->top;                           // O próximo nó do novo nó é o nó que estava no topo

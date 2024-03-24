@@ -11,7 +11,7 @@ typedef struct
     char marca[MAX_CHAR];
     float peso;
     float preco;
-    int quantidade;
+    unsigned int quantidade;
 } Produto;
 
 typedef struct Node
@@ -25,13 +25,13 @@ typedef struct
     int codigo;
     char nome[MAX_CHAR];
     Node* top; // IMP: Ponteiro para o topo da pilha de produtos.
-    int num_produtos; // IMP: Número de produtos na linha. RES: Contagem de num de produtos em array
+    unsigned int num_produtos; // IMP: Número de produtos na linha. RES: Contagem de num de produtos em array
 } LinhaProdutos;
 
 LinhaProdutos criarLinhaProdutos(int codigo, char nome[]);
 int apagaLinhaProdutos(LinhaProdutos *linha);
 
-Produto criarProduto(int codigo, char* nome, char* marca, float preco, int quantidade);
+Produto criarProduto(int codigo, char* nome, char* marca, float peso, float preco, int quantidade);
 Produto* obterProduto(LinhaProdutos* linha, int codigo);
 int adicionarProduto(LinhaProdutos *linha, Produto produto);
 int removerProduto(LinhaProdutos* linha, int codigo);

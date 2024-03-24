@@ -4,4 +4,5 @@ project(Projeto C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(Projeto main.c
-        src/visual.c)
+        src/visual.c
+        src/produtos.c)

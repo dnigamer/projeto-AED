@@ -4,6 +4,8 @@
 #include <termios.h>
 #include <stdio.h>
 #include <string.h>
+#include <locale.h>
+#include <wchar.h>
 
 static struct termios old, current;
 
@@ -42,6 +44,21 @@ char getche() {
     ch = (char) getchar();
     resetTermios();
     return ch;
+}
+
+int display_len(const char *s) {
+    setlocale(LC_ALL, "");  // set locale to handle special characters
+    int len = 0;
+    wchar_t wc;
+    mbstate_t state = {0};
+    while (*s != '\0') {
+        size_t n = mbrtowc(&wc, s, MB_CUR_MAX, &state);
+        if (n == (size_t)-1 || n == (size_t)-2)
+            break;  // stop on encoding error
+        s += n;
+        len += wcwidth(wc);
+    }
+    return len;
 }
 
 #endif
