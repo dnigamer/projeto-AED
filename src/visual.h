@@ -2,7 +2,9 @@
 #define VISUAL_H
 
 int mainMenu();
-int productsMenu();
-int listsMenu();
+int productsInitMenu();
+int listsInitMenu();
+
+int productsMenu(int operation);
 
 #endif
