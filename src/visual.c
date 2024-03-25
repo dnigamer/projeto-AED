@@ -168,6 +168,34 @@ void mostraMenu(int tipo, int campoSelecionado, char *campos[], Produto *prodtmp
         printf("Edite tudo o que deseja e pressione F para concluir. ");
 }
 
+int confirmaMenu() {
+    clear();
+
+    printf("\n");
+    line(0);
+    printf("| Deseja confirmar a operação?           |\n");
+    line(0);
+    printf("| 1. Sim                                 |\n");
+    printf("| 2. Não                                 |\n");
+    line(0);
+    printf("Selecione uma opção: ");
+
+    do {
+        char pick = getche();
+        switch (pick) {
+            case '1':
+                printf("\n");
+                return 1;
+            case '2':
+                printf("\n");
+                return 0;
+            default:
+                break;
+        }
+    } while (1);
+
+}
+
 int productsMenu(int operation) {
     clear();
     int key;
@@ -194,7 +222,7 @@ int productsMenu(int operation) {
                             break;
                         case 80: // setas baixo win e mac
                         case 66:
-                            if (campSel < 4)
+                            if (campSel < 5)
                                 campSel++;
                             break;
                     }
@@ -206,18 +234,21 @@ int productsMenu(int operation) {
 
                     switch (campSel) {
                         case 0:
-                            strcpy(prodtmp.nome, input);
+                            prodtmp.codigo = strtol(input, NULL, 10);
                             break;
                         case 1:
-                            strcpy(prodtmp.marca, input);
+                            strcpy(prodtmp.nome, input);
                             break;
                         case 2:
-                            prodtmp.peso = strtof(input, NULL);
+                            strcpy(prodtmp.marca, input);
                             break;
                         case 3:
-                            prodtmp.preco = strtof(input, NULL);
+                            prodtmp.peso = strtof(input, NULL);
                             break;
                         case 4:
+                            prodtmp.preco = strtof(input, NULL);
+                            break;
+                        case 5:
                             prodtmp.quantidade = strtol(input, NULL, 10);
                             break;
                         default:
@@ -226,7 +257,13 @@ int productsMenu(int operation) {
                     if (strlen(input) == 0)
                         enterTimes += 2;
                 } else if (key == 102) { // quando se pressiona F para acabar de introduzir os dados
-                    //adicionarProduto(&prodtmp);
+                    int confirm = confirmaMenu();
+                    if (confirm == 1) {
+                        //adicionarProduto(&prodtmp);
+                        printf("Produto adicionado com sucesso!\n");
+                    } else {
+                        printf("Operação cancelada!\n");
+                    }
                     printf("\n");
                     enterTimes = 2;
                 }

@@ -6,7 +6,7 @@
 
 typedef struct 
 {
-    int codigo;
+    unsigned int codigo;
     char nome[MAX_CHAR];
     char marca[MAX_CHAR];
     float peso;
