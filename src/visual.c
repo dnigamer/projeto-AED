@@ -134,7 +134,7 @@ int mainMenu() {
 
 }
 
-void mostraMenu(int tipo, int campoSelecionado, char *campos[], Produto *prodtmp, int info) {
+void mostraMenuProdutos(int tipo, int campoSelecionado, char *campos[], Produto *prodtmp, int info) {
     clear();
 
     // Cabeçalho
@@ -149,23 +149,46 @@ void mostraMenu(int tipo, int campoSelecionado, char *campos[], Produto *prodtmp
     line(windowSize);
 
     // Corpo
-    for (int i = 0; i < 6; ++i) {
-        if (campoSelecionado == i)
-            printf("| > ");
-        else
-            printf("|   ");
-        char codigo[12], preco[15], peso[16], quantidade[12];
+    if (tipo == 1 || tipo == 3 || tipo == 5) {
+        for (int i = 0; i < 6; ++i) {
+            if (campoSelecionado == i)
+                printf("| > ");
+            else
+                printf("|   ");
+            char codigo[12], preco[15], peso[16], quantidade[12];
+            sprintf(codigo, "%d", prodtmp->codigo);
+            sprintf(preco, "%.2f EUR", prodtmp->preco);
+            sprintf(peso, "%.3f kg", prodtmp->peso);
+            sprintf(quantidade, "%d", prodtmp->quantidade);
+            printf("%-13s: %-*s |\n", campos[i], (windowSize - 19), (i == 0 ? codigo : i == 1 ? prodtmp->nome : i == 2 ? prodtmp->marca: i == 3 ? peso: i == 4 ? preco: quantidade));
+        }
+    } else if (tipo == 2) {
+        char codigo[12];
         sprintf(codigo, "%d", prodtmp->codigo);
-        sprintf(preco, "%.2f EUR", prodtmp->preco);
-        sprintf(peso, "%.3f kg", prodtmp->peso);
-        sprintf(quantidade, "%d", prodtmp->quantidade);
-        printf("%-13s: %-*s |\n", campos[i], (windowSize - 19), (i == 0 ? codigo : i == 1 ? prodtmp->nome : i == 2 ? prodtmp->marca: i == 3 ? peso: i == 4 ? preco: quantidade));
+        printf("| > %-13s: %-*s |\n", "Codigo", (windowSize - 19), codigo);
+    } else if (tipo == 4) {
+        char codigo[12];
+        sprintf(codigo, "%d", prodtmp->codigo);
+        printf("| > %-13s: %-*s |\n", "Codigo", (windowSize - 19), codigo);
     }
     line(windowSize);
 
     // Informação pé
-    if (info == 1)
-        printf("Edite tudo o que deseja e pressione F para concluir. ");
+    if (info == 1 && tipo == 1) {
+        printf("Introduza valores para todos os campos.\n");
+        printf("Pressione F para concluir. ");
+    } else if (info == 1 && tipo == 2) {
+        printf("Introduza o código do produto a remover.\n");
+        printf("Pressione F para concluir a remoção. ");
+    } else if (info == 1 && tipo == 3) {
+        printf("Edite tudo o que deseja\n");
+        printf("Pressione F para concluir. ");
+    } else if (info == 1 && tipo == 4) {
+        printf("Pressione F para fechar a visualização. ");
+    } else if (info == 1 && tipo == 5) {
+        printf("Introduza valores para os campos a considerar na procura.\n");
+        printf("Pressione F para concluir. ");
+    }
 }
 
 int confirmaMenu() {
@@ -198,36 +221,37 @@ int confirmaMenu() {
 
 int productsMenu(int operation) {
     clear();
+
     int key;
-    int enterTimes = 0;
     int campSel = 0;
+    int breakLoop = 0;
     char input[50];
+    Produto prodtmp = criarProduto(0, "", "", 0, 0, 0);
+    char *fields[] = {"Codigo", "Nome", "Marca", "Peso", "Preco", "Quantidade"};
 
     switch (operation) {
         case 1:
             clear();
-            Produto prodtmp = criarProduto(0, "", "", 0, 0, 0);
-            char *fields[] = {"Codigo", "Nome", "Marca", "Peso", "Preco", "Quantidade"};
             do {
-                mostraMenu(1, campSel, fields, &prodtmp, 1);
+                mostraMenuProdutos(1, campSel, fields, &prodtmp, 1);    // mostra o menu com a informação
                 key = (unsigned char) getch();
 
                 if (key == '\033'){
                     getch();
                     switch (getch()) {
-                        case 72: // setas cima win e mac
+                        case 72:
                         case 65:
                             if (campSel > 0)
                                 campSel--;
                             break;
-                        case 80: // setas baixo win e mac
+                        case 80:
                         case 66:
                             if (campSel < 5)
                                 campSel++;
                             break;
                     }
                 } else if (key == '\n') {
-                    mostraMenu(1, campSel, fields, &prodtmp, 0);
+                    mostraMenuProdutos(1, campSel, fields, &prodtmp, 0); // mostra o menu sem a informação
                     printf("Introduza %s: ", fields[campSel]);
                     fgets(input, 50, stdin);
                     input[strcspn(input, "\n")] = 0;
@@ -254,24 +278,49 @@ int productsMenu(int operation) {
                         default:
                             break;
                     }
-                    if (strlen(input) == 0)
-                        enterTimes += 2;
                 } else if (key == 102) { // quando se pressiona F para acabar de introduzir os dados
                     int confirm = confirmaMenu();
                     if (confirm == 1) {
                         //adicionarProduto(&prodtmp);
+                        printf("\nprodtmp: %d \"%s\" \"%s\" %.3f %.2f %d\n", prodtmp.codigo, prodtmp.nome, prodtmp.marca, prodtmp.peso, prodtmp.preco, prodtmp.quantidade);
                         printf("Produto adicionado com sucesso!\n");
+                        breakLoop = 1;
                     } else {
                         printf("Operação cancelada!\n");
+                        breakLoop = 1;
                     }
                     printf("\n");
-                    enterTimes = 2;
                 }
 
-            } while (enterTimes != 2);
+            } while (breakLoop == 0);
             break;
         case 2:
-            printf("Remover um produto\n");
+            clear();
+            do {
+                mostraMenuProdutos(2, campSel, fields, &prodtmp, 1);
+                key = (unsigned char) getch();
+
+                if (key == '\n') {
+                    mostraMenuProdutos(2, campSel, fields, &prodtmp, 0);
+                    printf("Introduza o código: ");
+                    fgets(input, 50, stdin);
+                    input[strcspn(input, "\n")] = 0;
+                    prodtmp.codigo = strtol(input, NULL, 10);
+                } else if (key == 102) {
+                    int confirm = confirmaMenu();
+                    if (confirm == 1) {
+                        //removerProduto(&prodtmp);
+                        printf("\nprodtmp: %d \"%s\" \"%s\" %.3f %.2f %d\n", prodtmp.codigo, prodtmp.nome, prodtmp.marca, prodtmp.peso, prodtmp.preco, prodtmp.quantidade);
+                        printf("Produto removido com sucesso!\n");
+                        breakLoop = 1;
+                    } else {
+                        printf("Operação cancelada!\n");
+                        breakLoop = 1;
+                    }
+                    printf("\n");
+                }
+
+            } while (breakLoop == 0);
             break;
         case 3:
             printf("Editar um produto\n");
