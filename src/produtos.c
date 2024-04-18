@@ -17,18 +17,37 @@ LinhaProdutos criarLinhaProdutos(int codigo, char nome[]) {
     return lp;                                              // Retorna a linha de produtos
 }
 
-// Apaga uma linha de produtos
-// Retorna 0 se a linha foi apagada com sucesso
-// Retorna 1 se a linha não foi apagada
-int apagaLinhaProdutos(LinhaProdutos* linha) {
-    if (linha->top == NULL) return 1;                       // Retorna 1 se a linha não foi apagada
-    Node* top_node = linha->top;                            // Obtém o ponteiro para o nó do topo
-    free(top_node);                                         // Libera a memória do nó do topo, apagando a stack inteira
+// Criar linha de produtos dentro do stock da loja
+// Usa stock da loja como pointer e usa linha de produtos a incluir no stock como pointer
+int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha) {
+    LinhaProdutos* novas_linhas = (LinhaProdutos*) malloc(sizeof(LinhaProdutos) * (stockLoja->num_linhas + 1)); // Aloca memória para um novo array de linhas
+    if (novas_linhas == NULL) return 1;                    // Retorna 1 se houve um erro ao alocar memória
+    for (int i = 0; i < stockLoja->num_linhas; i++) {
+        novas_linhas[i] = stockLoja->linhas[i];            // Copia as linhas do array antigo para o novo array
+    }
+    novas_linhas[stockLoja->num_linhas] = *linha;          // Adiciona a nova linha ao novo array
+    free(stockLoja->linhas);                               // Libera a memória do array antigo
+    stockLoja->linhas = novas_linhas;                      // Atribui o novo array ao stock
+    stockLoja->num_linhas++;                               // Incrementa o número de linhas
     return 0;
 }
 
+// Apaga uma linha de produtos dado um stock da loja
+int apagaLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha) {
+    for (int i = 0; i < stockLoja->num_linhas; i++) {
+        if (stockLoja->linhas[i].codigo == linha->codigo) {
+            for (int j = i; j < stockLoja->num_linhas - 1; j++) {
+                stockLoja->linhas[j] = stockLoja->linhas[j + 1];
+            }
+            stockLoja->num_linhas--;
+            return 0;
+        }
+    }
+    return 1;
+}
+
 // Cria um novo produto usando os parâmetros fornecidos
-// Retorna o produto
+// Retorna um struct de produto
 Produto criarProduto(int codigo, char* nome, char* marca, float peso, float preco, int quantidade) {
     Produto p;                                              // Cria uma nova instância para o produto
     p.codigo = codigo;                                      // Atribui o código ao produto
