@@ -20,11 +20,6 @@ jobs:
               persist-credentials: false
               ref: ${{ github.event.inputs.checkoutRef }}
 
-          - name: Set up CMake
-            uses: actions/setup-cmake@v2
-            with:
-              cmake-version: '3.20.0'
-
           - name: Build on Linux
             run: cmake -B build_linux -S . -DCMAKE_BUILD_TYPE=${BUILD_TYPE} && cmake --build build --config ${BUILD_TYPE}
 
@@ -38,11 +33,6 @@ jobs:
               persist-credentials: false
               ref: ${{ github.event.inputs.checkoutRef }}
 
-          - name: Set up CMake
-            uses: actions/setup-cmake@v2
-            with:
-              cmake-version: '3.20.0'
-
           - name: Build on Windows
             run: cmake -B build_windows -S . -DCMAKE_BUILD_TYPE=${BUILD_TYPE} && cmake --build build --config ${BUILD_TYPE}
 
@@ -55,11 +45,6 @@ jobs:
             with:
               persist-credentials: false
               ref: ${{ github.event.inputs.checkoutRef }}
-
-          - name: Set up CMake
-            uses: actions/setup-cmake@v2
-            with:
-              cmake-version: '3.20.0'
 
           - name: Build on MacOS
             run: cmake -B build_macos -S . -DCMAKE_BUILD_TYPE=${BUILD_TYPE} && cmake --build build --config ${BUILD_TYPE}
