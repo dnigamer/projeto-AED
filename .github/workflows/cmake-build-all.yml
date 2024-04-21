@@ -26,9 +26,6 @@ jobs:
           - name: Build project
             run: cmake --build build_linux --config ${BUILD_TYPE}
 
-          - name: Move artifacts to build folder
-            run: mv build_linux/* build
-
     build_windows:
         runs-on: windows-2019
 
@@ -48,9 +45,6 @@ jobs:
           - name: Build project
             run: cmake --build build_windows --config Release
 
-          - name: Move artifacts to build folder
-            run: mv build_windows/* build
-
     build_macos:
         runs-on: macos-latest
 
@@ -67,15 +61,18 @@ jobs:
           - name: Build project
             run: cmake --build build_macos --config ${BUILD_TYPE}
 
-          - name: Move artifacts to build folder
-            run: mv build_macos/* build
-
     export_artifacts:
         runs-on: ubuntu-latest
 
         needs: [build_linux, build_windows, build_macos]
 
         steps:
+          - name: Move built executables to export folder
+            run: |
+                mkdir -p build
+                cp build_linux/* build/
+                cp build_windows/* build/
+                cp build_macos/* build/
           - name: Upload artifacts
             uses: actions/upload-artifact@v2
             with:
