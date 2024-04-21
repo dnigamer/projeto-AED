@@ -9,6 +9,8 @@
 #define CLEAR "clear"
 #endif
 
+void intmenu(int*, int*);
+
 int main()
 {
     system(CLEAR);
