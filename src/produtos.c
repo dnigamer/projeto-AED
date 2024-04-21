@@ -1,7 +1,7 @@
 #include "produtos.h"
 #include <string.h>
 #include <stdlib.h>
-#include <printf.h>
+#include <stdio.h>
 
 /////////////////////////////////////////////////////////
 // Funções para manipulação de dados
