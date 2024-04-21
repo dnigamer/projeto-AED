@@ -30,7 +30,7 @@ jobs:
             run: mv build_linux/* build
 
     build_windows:
-        runs-on: windows-latest
+        runs-on: windows-2019
 
         steps:
           - name: Checkout the repo
@@ -43,7 +43,7 @@ jobs:
             uses: microsoft/setup-msbuild@v1
 
           - name: Configure CMake
-            run: cmake -B build_windows -DCMAKE_BUILD_TYPE=Release -G "Ninja"
+            run: cmake -B build_windows -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 16 2019" -A "x64
 
           - name: Build project
             run: cmake --build build_windows --config Release
