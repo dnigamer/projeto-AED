@@ -43,7 +43,7 @@ jobs:
             uses: microsoft/setup-msbuild@v1
 
           - name: Configure CMake
-            run: cmake -B build_windows -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 16 2019" -A "x64
+            run: cmake -B build_windows -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 16 2019"
 
           - name: Build project
             run: cmake --build build_windows --config Release
