@@ -73,7 +73,7 @@
        <string>+</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="remMarcaBtn">
+     <widget class="QPushButton" name="delMarcaBtn">
       <property name="geometry">
        <rect>
         <x>55</x>
@@ -160,7 +160,7 @@
        <iconset theme="mail-message-new"/>
       </property>
      </widget>
-     <widget class="QPushButton" name="remItemBtn">
+     <widget class="QPushButton" name="delItemBtn">
       <property name="geometry">
        <rect>
         <x>55</x>
@@ -186,7 +186,7 @@
      <property name="title">
       <string>Modelos</string>
      </property>
-     <widget class="QListView" name="listView_3">
+     <widget class="QListView" name="modelosLV">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -202,7 +202,7 @@
        </sizepolicy>
       </property>
      </widget>
-     <widget class="QPushButton" name="adMarcaBtn_2">
+     <widget class="QPushButton" name="adModeloBtn">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -215,7 +215,7 @@
        <string>+</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="edMarcaBtn_2">
+     <widget class="QPushButton" name="edModeloBtn">
       <property name="geometry">
        <rect>
         <x>100</x>
@@ -231,7 +231,7 @@
        <iconset theme="mail-message-new"/>
       </property>
      </widget>
-     <widget class="QPushButton" name="remMarcaBtn_2">
+     <widget class="QPushButton" name="delModeloBtn">
       <property name="geometry">
        <rect>
         <x>55</x>
@@ -561,9 +561,9 @@
    <widget class="QLabel" name="logoLoja">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>19</x>
       <y>15</y>
-      <width>80</width>
+      <width>71</width>
       <height>50</height>
      </rect>
     </property>
@@ -582,10 +582,13 @@
      <bool>true</bool>
     </property>
     <property name="text">
-     <string>LOGO</string>
+     <string/>
     </property>
     <property name="textFormat">
      <enum>Qt::TextFormat::AutoText</enum>
+    </property>
+    <property name="pixmap">
+     <pixmap>logo.png</pixmap>
     </property>
    </widget>
   </widget>
@@ -613,7 +616,7 @@
   <tabstop>procuraBtn</tabstop>
   <tabstop>marcasLV</tabstop>
   <tabstop>itensLV</tabstop>
-  <tabstop>listView_3</tabstop>
+  <tabstop>modelosLV</tabstop>
   <tabstop>codText</tabstop>
   <tabstop>nomeText</tabstop>
   <tabstop>marcaText</tabstop>
@@ -621,8 +624,5 @@
   <tabstop>quantText</tabstop>
   <tabstop>precoText</tabstop>
  </tabstops>
- <resources>
-  <include location="../../../../../../../Desktop/Screenshot 2024-05-02 at 21.51.49.qrc"/>
- </resources>
  <connections/>
 </ui>
