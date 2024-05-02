@@ -12,8 +12,20 @@
 int main(int argc, char *argv[])
 {
     StockLoja stockGeral = { "Mercado do bolhão", 0, NULL};
-    LinhaProdutos lojinha = criarLinhaProdutos(1, "Legumes");
-    adicionarLinhaProdutos(&stockGeral, &lojinha);
+    LinhaProdutos linhatemp = criarLinhaProdutos(1, "Legumes");
+    adicionarLinhaProdutos(&stockGeral, &linhatemp);
+    linhatemp = criarLinhaProdutos(2, "Frutas");
+    adicionarLinhaProdutos(&stockGeral, &linhatemp);
+
+    // TEMPORARIO
+    // adicionar produto a linha de produtos
+    Produto produto = criarProduto(1, "Maçã", "Golden", 0.2, 0.5, 10);
+    adicionarProduto(&stockGeral.linhas[0], produto);
+
+    produto = criarProduto(2, "Banana", "Madeira", 0.1, 0.3, 20);
+    adicionarProduto(&stockGeral.linhas[1], produto);
+
+
 
     startGui(argc, argv, &stockGeral);
     system(CLEAR);

@@ -1,7 +1,10 @@
 #include <QMessageBox>
 #include <QFile>
+#include <QStringListModel>
 #include "mainmenu.h"
 #include "ui_MainMenu.h"
+
+StockLoja *stock;
 
 // Função para abrir a base de dados (menu Ficheiro -> Abrir)
 void MainMenu::open()
@@ -82,6 +85,13 @@ MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) 
     ui->menuFicheiro->addSeparator();
     ui->menuFicheiro->addAction(actionExit);
 
+    // operações sobre ListViews
+    ui->marcasLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->itensLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->modelosLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    connect(ui->marcasLV, &QListView::clicked, this, &MainMenu::onListViewItemClicked);
+
     // Adicionar logo no sitio logoLoja
     if (!QFile::exists("logo.png")) {
         statusBar()->showMessage("Logo não encontrado. Aplicação funcionará sem o logo.");
@@ -105,7 +115,42 @@ MainMenu::~MainMenu()
 
 void MainMenu::setStock(StockLoja *ptr) {
     // TODO: Implementar a função para mostrar os produtos
+    stock = ptr;
+
     ui->nomeLojaLab->setText(ptr->nome);
+    auto *model = new QStringListModel(this);
+    QStringList list;
+    for (int i = 0; i < ptr->num_linhas; i++) {
+        LinhaProdutos linha = ptr->linhas[i];
+        QString linhaStr = linha.nome;
+        list << linhaStr;
+    }
+    model->setStringList(list);
+    ui->marcasLV->setModel(model);
+
+    connect(ui->marcasLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onListViewItemClicked);
+}
+
+void MainMenu::setItens(LinhaProdutos *ptr) {
+    auto *model = new QStringListModel(this);
+    QStringList list;
+    Node *current = ptr->top;
+    while (current != nullptr) {
+        Produto produto = current->produto;
+        QString produtoStr = produto.nome;
+        list << produtoStr;
+        current = current->next;
+    }
+    model->setStringList(list);
+    ui->itensLV->setModel(model);
+}
+
+
+void MainMenu::onListViewItemClicked(const QModelIndex &index) {
+    int linhaStock = index.row();
+    auto linha = (LinhaProdutos) obterLinhaProdutos(stock, linhaStock + 1);
+    // call for setItens with the corresponding LinhaProdutos
+    setItens(&linha);
 }
 
 #ifdef Q_OS_MACOS
@@ -116,4 +161,5 @@ void MainMenu::createMacMenu()
     QMenuBar* menuBar = ui->menubar;
     menuBar->setNativeMenuBar(true);
 }
+
 #endif

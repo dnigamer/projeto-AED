@@ -9,13 +9,16 @@
 #include <QMainWindow>
 #include "../produtos.h"
 
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainMenu; }
 QT_END_NAMESPACE
 
 class MainMenu : public QMainWindow {
     Q_OBJECT
+
+public slots:
+
+    [[maybe_unused]] void onListViewItemClicked(const QModelIndex &index);
 
 public:
     explicit MainMenu(QWidget *parent = nullptr);
@@ -35,6 +38,8 @@ private:
     #endif
 
     void quit();
+
+    void setItens(LinhaProdutos *ptr);
 };
 
 

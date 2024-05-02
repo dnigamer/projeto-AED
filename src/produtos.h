@@ -35,7 +35,17 @@ typedef struct
     LinhaProdutos* linhas; // IMP: Array de linhas de produtos.
 } StockLoja;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 LinhaProdutos criarLinhaProdutos(int codigo, char nome[]);
+LinhaProdutos obterLinhaProdutos(StockLoja* stockLoja, int codigo);
+
+#ifdef __cplusplus
+}
+#endif
+
 int adicionarLinhaProdutos(StockLoja *stock, LinhaProdutos *linha);
 int apagaLinhaProdutos(StockLoja *stock, LinhaProdutos *linha);
 
@@ -45,8 +55,5 @@ int adicionarProduto(LinhaProdutos *linha, Produto produto);
 int removerProduto(LinhaProdutos* linha, int codigo);
 int atualizarProduto(LinhaProdutos* linha, Produto produto);
 int numeroProdutos(LinhaProdutos* linha);
-
-void listarProduto(Produto* produto);
-void listarLinhaProduto(LinhaProdutos* linha);
 
 #endif
