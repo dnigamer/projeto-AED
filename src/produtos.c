@@ -1,11 +1,6 @@
 #include "produtos.h"
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
-
-/////////////////////////////////////////////////////////
-// Funções para manipulação de dados
-/////////////////////////////////////////////////////////
 
 // Cria uma nova instância para a linha de produtos
 // Retorna a linha de produtos
@@ -16,6 +11,16 @@ LinhaProdutos criarLinhaProdutos(int codigo, char nome[]) {
     lp.top = NULL;                                          // Inicializa o topo da stack como NULL
     return lp;                                              // Retorna a linha de produtos
 }
+
+LinhaProdutos obterLinhaProdutos(StockLoja* stockLoja, int codigo) {
+    for (int i = 0; i < stockLoja->num_linhas; i++) {
+        if (stockLoja->linhas[i].codigo == codigo) {
+            return stockLoja->linhas[i];
+        }
+    }
+    return criarLinhaProdutos(0, "");
+}
+
 
 // Criar linha de produtos dentro do stock da loja
 // Usa stock da loja como pointer e usa linha de produtos a incluir no stock como pointer
@@ -125,7 +130,7 @@ int atualizarProduto(LinhaProdutos* linha, Produto Produto) {
 }
 
 // Retorna o número de produtos numa linha de produtos
-int numeroProdutos(LinhaProdutos* linha) {
+int numeroProdutosLinha(LinhaProdutos* linha) {
     Node* current = linha->top;                             // Obtém o nó do topo
     int count = 0;                                          // Inicializa o contador como 0
     while (current != NULL) {                               // Enquanto o nó atual não for NULL
@@ -135,32 +140,10 @@ int numeroProdutos(LinhaProdutos* linha) {
     return count;                                           // Retorna o contador
 }
 
-/////////////////////////////////////////////////////////
-// Funções para apresentação de dados
-/////////////////////////////////////////////////////////
-
-// Apresenta os dados de um produto
-void listarProduto(Produto* produto) {
-    printf("+------------------------------------------+\n");
-    printf("| Código:     | %-25d |\n", produto->codigo);                // Apresenta o código do produto
-    printf("+------------------------------------------+\n");
-    printf("| Nome:       | %-25s |\n", produto->nome);                    // Apresenta o nome do produto
-    printf("| Marca:      | %-25s |\n", produto->marca);                  // Apresenta a marca do produto
-    printf("| Preço:      | %-25.2f |\n", produto->preco);                // Apresenta o preço do produto
-    printf("| Quantidade: | %-25d |\n", produto->quantidade);        // Apresenta a quantidade do produto
-    printf("+------------------------------------------+\n");
-}
-
-// Apresenta os dados de uma linha de produtos
-void listarLinhaProduto(LinhaProdutos* linha) {
-    printf("+----------------------------------------+\n");
-    printf("| Código da Linha | %-18d |\n", linha->codigo);
-    printf("| Nome da Linha   | %-18s |\n", linha->nome);
-    printf("+----------------------------------------+\n");
-    Node* current = linha->top;
-    while (current != NULL) {
-        listarProduto(&current->produto);
-        current = current->next;
+int numeroProdutosStock(StockLoja* stock) {
+    int count = 0;                                                // Inicializa o contador como 0
+    for (int i = 0; i < stock->num_linhas; i++) {                 // Para cada linha de produtos
+        count += numeroProdutosLinha(&stock->linhas[i]);    // Incrementa o contador com o número de produtos na linha
     }
-    printf("+----------------------------------------+\n");
+    return count;                                                 // Retorna o contador
 }

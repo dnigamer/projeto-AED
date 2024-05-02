@@ -1,17 +1,31 @@
 cmake_minimum_required(VERSION 3.27)
-project(Projeto C)
+project(Projeto)
 
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+find_package(Qt6 COMPONENTS
+        Core
+        Gui
+        Widgets
+        REQUIRED)
 
 add_executable(Projeto main.c
-        src/visual.c
         src/produtos.c
+        src/gui/gui.cpp
+        src/gui/gui.h
+        src/gui/mainmenu.cpp
+)
+
+target_link_libraries(Projeto
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
 )
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
-
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O3 -j 6")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -j 6")
