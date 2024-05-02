@@ -30,7 +30,7 @@ typedef struct
 
 typedef struct
 {
-    char nome[MAX_CHAR];
+    char nome[20]; // Max 20 chars porque sai fora da label do mainmenu
     unsigned int num_linhas; // IMP: Número de linhas de produtos. RES: Contagem de num de linhas em array
     LinhaProdutos* linhas; // IMP: Array de linhas de produtos.
 } StockLoja;

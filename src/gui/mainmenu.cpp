@@ -105,7 +105,7 @@ MainMenu::~MainMenu()
 
 void MainMenu::setStock(StockLoja *ptr) {
     // TODO: Implementar a função para mostrar os produtos
-
+    ui->nomeLojaLab->setText(ptr->nome);
 }
 
 #ifdef Q_OS_MACOS

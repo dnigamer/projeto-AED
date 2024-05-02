@@ -14,7 +14,6 @@ find_package(Qt6 COMPONENTS
         REQUIRED)
 
 add_executable(Projeto main.c
-        src/visual.c
         src/produtos.c
         src/gui/gui.cpp
         src/gui/gui.h
