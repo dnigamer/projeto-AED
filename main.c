@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "src/visual.h"
 #include "src/produtos.h"
+#include "src/gui/gui.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #define CLEAR "cls"
@@ -11,13 +12,16 @@
 
 void intmenu(int*, int*);
 
-int main()
+int main(int argc, char *argv[])
 {
-    system(CLEAR);
-
-    StockLoja stockGeral = { "Loja Gira", 0, NULL };
+    StockLoja stockGeral = { "Mercado do bolhão", 0, NULL };
     LinhaProdutos lojinha = criarLinhaProdutos(1, "Legumes");
     adicionarLinhaProdutos(&stockGeral, &lojinha);
+
+    startGui(argc, argv, &stockGeral);
+    system(CLEAR);
+
+    return 0;
 
     int tipo = 0, operation = 0;
 
