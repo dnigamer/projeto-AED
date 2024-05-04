@@ -4,56 +4,85 @@
 
 #define MAX_CHAR 50
 
-typedef struct 
-{
-    unsigned int codigo;
-    char nome[MAX_CHAR];
-    char marca[MAX_CHAR];
-    float peso;
-    float preco;
-    unsigned int quantidade;
-} Produto;
-
-typedef struct Node
-{
-    Produto produto; // IMP: Primeiro produto da pilha.
-    struct Node* next; // IMP: Ponteiro para o próximo produto da pilha.
-} Node;
-
-typedef struct
-{
-    unsigned int codigo;
-    char nome[MAX_CHAR];
-    unsigned int num_produtos; // IMP: Número de produtos na linha. RES: Contagem de num de produtos em array
-    Node* top; // IMP: Ponteiro para o topo da pilha de produtos.
-} LinhaProdutos;
-
-typedef struct
-{
-    char nome[20]; // Max 20 chars porque sai fora da label do mainmenu
-    unsigned int num_linhas; // IMP: Número de linhas de produtos. RES: Contagem de num de linhas em array
-    LinhaProdutos* linhas; // IMP: Array de linhas de produtos.
-} StockLoja;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-LinhaProdutos criarLinhaProdutos(int codigo, char nome[]);
-LinhaProdutos obterLinhaProdutos(StockLoja* stockLoja, int codigo);
+// definição de struct de parâmetros adicionais para um produto
+typedef struct {
+    char nome[MAX_CHAR];
+    char valor[MAX_CHAR];
+} ParamAdicionaisProduto;
+
+// definição de struct de lista de parâmetros adicionais para um produto
+typedef struct {
+    ParamAdicionaisProduto* parametro;
+    struct ListaParamAdicionaisProduto* prox_parametro;
+} ListaParamAdicionaisProduto;
+
+
+// definição de struct de produto
+typedef struct 
+{
+    unsigned int codigo;
+    char nome[MAX_CHAR]; // nome inteiro do produto (item + modelo + outros)
+    char item[MAX_CHAR];
+    char modelo[MAX_CHAR];
+    unsigned int quantidade;
+    double preco;
+    unsigned int num_parametros;
+    ListaParamAdicionaisProduto* parametros;
+} Produto;
+
+// definição de struct de lista de produtos para uma linha de produtos
+typedef struct {
+    Produto* produto;
+    struct ListaProduto* prox_produto;
+} ListaProduto;
+
+
+// definição de struct de linha de produtos
+typedef struct {
+    unsigned int codigo;
+    char nome[MAX_CHAR];
+    unsigned int num_produtos;
+    ListaProduto* lista_produtos;
+} LinhaProdutos;
+
+typedef struct {
+    LinhaProdutos* linha;
+    struct ListaLinhaProdutos* prox_linha;
+} ListaLinhaProdutos;
+
+
+// definição de struct de stock para a loja
+typedef struct {
+    char nome[20];
+    unsigned int num_linhas;
+    ListaLinhaProdutos* lista_produtos;
+} StockLoja;
+
+// Funções para manipulação de linhas de produtos
+LinhaProdutos criarLinhaProdutos(unsigned int codigo, char* nome);
+LinhaProdutos* obterLinhaProdutos(StockLoja* stockLoja, int codigo);
+int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha);
+int removerLinhaProdutos(StockLoja* stockLoja, int codigo);
+int atualizarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha);
+unsigned int getNumeroLinhasProdutos(StockLoja* stockLoja);
+
+// Funções para manipulação de produtos
+Produto criarProduto(unsigned int codigo, char* nome, char* item, char* modelo, unsigned int quantidade, double preco, ListaParamAdicionaisProduto* parametros);
+Produto* obterProduto(LinhaProdutos* linha, int codigo);
+int adicionarProduto(LinhaProdutos* linha, Produto* produto);
+int removerProduto(LinhaProdutos* linha, int codigo);
+int atualizarProduto(LinhaProdutos* linha, Produto* produto);
+
+// Outras funções
+int numeroProdutosLinha(LinhaProdutos* linha);
+int numeroProdutosStock(StockLoja* stock);
 
 #ifdef __cplusplus
 }
 #endif
-
-int adicionarLinhaProdutos(StockLoja *stock, LinhaProdutos *linha);
-int apagaLinhaProdutos(StockLoja *stock, LinhaProdutos *linha);
-
-Produto criarProduto(int codigo, char* nome, char* marca, float peso, float preco, int quantidade);
-Produto* obterProduto(LinhaProdutos* linha, int codigo);
-int adicionarProduto(LinhaProdutos *linha, Produto produto);
-int removerProduto(LinhaProdutos* linha, int codigo);
-int atualizarProduto(LinhaProdutos* linha, Produto produto);
-int numeroProdutos(LinhaProdutos* linha);
 
 #endif

@@ -1,0 +1,18 @@
+- Itens (Ex: Camisas, calças, sapatos)
+ - Modelos (Ex: Camisa Polo, Camisa Social, Calças Jeans, Calças Social, Sapato Social, Sapato Casual)
+  - Código          (Ex: 001) - unsigned int
+   - Código interno para identificação do produto em estilo <item><modelo><submodelo>
+  - Nome            (Ex: Camisa Polo) - string
+   - Nome do produto
+  - Marca           (Ex: Adidas) - string
+   - Marca do produto
+  - Item            (Ex: Camisa) - string
+   - Item do produto
+  - Sub-item        (Ex: Polo) - string
+   - Sub-item do produto
+  - Preço           (Ex: 100.00) - float
+  - Quantidade      (Ex: 10) - unsigned int
+   - Definição de quantidade em estoque
+  - Param Adicional (Ex: Tamanho, Cor, Material, Estampa, etc) - array
+    - Parâmetros adicionais do produto
+    - Criar um array com os parâmetros adicionais do produto ou struct com os parâmetros adicionais do produto
