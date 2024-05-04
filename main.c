@@ -11,22 +11,29 @@
 
 int main(int argc, char *argv[])
 {
+    // Define uma instância de stock
     StockLoja stockGeral = { "Mercado do bolhão", 0, NULL};
+
+    // TEMPORARIO
+    // cria uma linha de produtos e adiciona ao stock
     LinhaProdutos linhatemp = criarLinhaProdutos(1, "Legumes");
     adicionarLinhaProdutos(&stockGeral, &linhatemp);
+
+    // cria outra linha de produtos para stock
     linhatemp = criarLinhaProdutos(2, "Frutas");
     adicionarLinhaProdutos(&stockGeral, &linhatemp);
 
     // TEMPORARIO
     // adicionar produto a linha de produtos
-    Produto produto = criarProduto(1, "Maçã", "Golden", 0.2, 0.5, 10);
-    adicionarProduto(&stockGeral.linhas[0], produto);
+    Produto produto = { 1, "Maçã", "Fruta", "Maçã", 10, 0.5, 0, NULL };
+    adicionarProduto(obterLinhaProdutos(&stockGeral, 1), &produto);
 
-    produto = criarProduto(2, "Banana", "Madeira", 0.1, 0.3, 20);
-    adicionarProduto(&stockGeral.linhas[1], produto);
+    // TEMPORARIO
+    // adicionar produto a linha de produtos
+    Produto produto2 = { 2, "Banana", "Fruta", "Banana", 10, 0.5, 0, NULL };
+    adicionarProduto(obterLinhaProdutos(&stockGeral, 1), &produto2);
 
-
-
+    // chama a função para iniciar a GUI
     startGui(argc, argv, &stockGeral);
     system(CLEAR);
 

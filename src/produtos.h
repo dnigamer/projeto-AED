@@ -59,7 +59,7 @@ typedef struct ListaLinhaProdutos {
 typedef struct {
     char nome[20];
     unsigned int num_linhas;
-    ListaLinhaProdutos* lista_produtos;
+    ListaLinhaProdutos* lista_linhas;
 } StockLoja;
 
 // Funções para manipulação de linhas de produtos

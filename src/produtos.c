@@ -14,7 +14,7 @@ LinhaProdutos criarLinhaProdutos(unsigned int codigo, char* nome) {
 }
 
 LinhaProdutos* obterLinhaProdutos(StockLoja* stockLoja, int codigo) {
-    ListaLinhaProdutos* atual_linha = stockLoja->lista_produtos;
+    ListaLinhaProdutos* atual_linha = stockLoja->lista_linhas;
     while (atual_linha != NULL) {
         if (atual_linha->linha->codigo == codigo) {
             return atual_linha->linha;
@@ -31,8 +31,8 @@ int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha) {
     if (novo_no == NULL) return 1;
 
     novo_no->linha = linha;
-    novo_no->prox_linha = (struct ListaLinhaProdutos *) stockLoja->lista_produtos;
-    stockLoja->lista_produtos = novo_no;
+    novo_no->prox_linha = (struct ListaLinhaProdutos *) stockLoja->lista_linhas;
+    stockLoja->lista_linhas = novo_no;
 
     stockLoja->num_linhas++;
     return 0;
@@ -41,14 +41,14 @@ int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha) {
 // Remove uma linha de produtos do stock da loja
 // Utiliza o stock da loja como pointer e o código da linha a remover
 int removerLinhaProdutos(StockLoja* stockLoja, int codigo) {
-    if (stockLoja->lista_produtos == NULL) return 1;
+    if (stockLoja->lista_linhas == NULL) return 1;
 
-    ListaLinhaProdutos* temp = stockLoja->lista_produtos;
+    ListaLinhaProdutos* temp = stockLoja->lista_linhas;
     ListaLinhaProdutos* prev = NULL;
 
     // Se o primeiro nó contém a chave a ser excluída
     if (temp != NULL && temp->linha->codigo == codigo) {
-        stockLoja->lista_produtos = (ListaLinhaProdutos *) temp->prox_linha;
+        stockLoja->lista_linhas = (ListaLinhaProdutos *) temp->prox_linha;
         free(temp);
         return 0;
     }
@@ -75,7 +75,7 @@ int removerLinhaProdutos(StockLoja* stockLoja, int codigo) {
 // Atualiza uma linha de produtos no stock da loja
 // Utiliza o stock da loja como pointer e a linha de produtos a atualizar como pointer
 int atualizarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha) {
-    ListaLinhaProdutos* current = stockLoja->lista_produtos;
+    ListaLinhaProdutos* current = stockLoja->lista_linhas;
     while (current != NULL) {
         if (current->linha->codigo == linha->codigo) {
             current->linha = linha;
