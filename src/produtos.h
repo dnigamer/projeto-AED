@@ -15,7 +15,7 @@ typedef struct {
 } ParamAdicionaisProduto;
 
 // definição de struct de lista de parâmetros adicionais para um produto
-typedef struct {
+typedef struct ListaParamAdicionaisProduto {
     ParamAdicionaisProduto* parametro;
     struct ListaParamAdicionaisProduto* prox_parametro;
 } ListaParamAdicionaisProduto;
@@ -35,7 +35,7 @@ typedef struct
 } Produto;
 
 // definição de struct de lista de produtos para uma linha de produtos
-typedef struct {
+typedef struct ListaProduto {
     Produto* produto;
     struct ListaProduto* prox_produto;
 } ListaProduto;
@@ -49,7 +49,7 @@ typedef struct {
     ListaProduto* lista_produtos;
 } LinhaProdutos;
 
-typedef struct {
+typedef struct ListaLinhaProdutos {
     LinhaProdutos* linha;
     struct ListaLinhaProdutos* prox_linha;
 } ListaLinhaProdutos;

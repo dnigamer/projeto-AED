@@ -16,3 +16,93 @@
   - Param Adicional (Ex: Tamanho, Cor, Material, Estampa, etc) - array
     - Parâmetros adicionais do produto
     - Criar um array com os parâmetros adicionais do produto ou struct com os parâmetros adicionais do produto
+
+- Stock
+    - Lista de linhas
+        - Linha de produtos
+            ------------------------
+            - Código
+            - Lista de produtos
+                ------------------------
+                - Produto (codigo, infos.)
+                    - Lista de parâmetros
+                        - Parametro
+                        - Parãmetro
+                ------------------------
+                    ------------------------
+                    - Produto (codigo, infos.)
+                        - Lista de parâmetros
+                            - Parametro
+                            - Parãmetro
+                    ------------------------
+                        ------------------------
+                        - Produto (codigo, infos.)
+                            - Lista de parâmetros
+                                - Parametro
+                                - Parãmetro
+                        ------------------------
+                            ------------------------
+                            - Produto (codigo, infos.)
+                                - Lista de parâmetros
+                                    - Parametro
+                                    - Parãmetro
+                            ------------------------
+            ------------------------
+                ------------------------
+                - Linha de produtos
+                    - Código
+                    - Lista de produtos
+                        ------------------------
+                        - Produto (codigo, infos.)
+                            - Lista de parâmetros
+                                - Parametro
+                                - Parãmetro
+                        ------------------------
+                            ------------------------
+                            - Produto (codigo, infos.)
+                                - Lista de parâmetros
+                                    - Parametro
+                                    - Parãmetro
+                            ------------------------
+                                ------------------------
+                                - Produto (codigo, infos.)
+                                    - Lista de parâmetros
+                                        - Parametro
+                                        - Parãmetro
+                                ------------------------
+                                    ------------------------
+                                    - Produto (codigo, infos.)
+                                        - Lista de parâmetros
+                                            - Parametro
+                                            - Parãmetro
+                                    ------------------------
+                ------------------------
+                    ------------------------
+                    - Linha de produtos
+                        - Código
+                        - Lista de produtos
+                            ------------------------
+                            - Produto (codigo, infos.)
+                                - Lista de parâmetros
+                                    - Parametro
+                                    - Parãmetro
+                            ------------------------
+                                ------------------------
+                                - Produto (codigo, infos.)
+                                    - Lista de parâmetros
+                                        - Parametro
+                                        - Parãmetro
+                                ------------------------
+                                    ------------------------
+                                    - Produto (codigo, infos.)
+                                        - Lista de parâmetros
+                                            - Parametro
+                                            - Parãmetro
+                                    ------------------------
+                                        ------------------------
+                                        - Produto (codigo, infos.)
+                                            - Lista de parâmetros
+                                                - Parametro
+                                                - Parãmetro
+                                        ------------------------
+                    ------------------------
