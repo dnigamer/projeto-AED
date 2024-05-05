@@ -20,8 +20,18 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.inputs.checkoutRef }}
 
+      - name: Cache Qt6
+        uses: actions/cache@v4
+        with:
+          path: /usr/lib/x86_64-linux-gnu/qt6
+          key: "${{ runner.os }}-qt6-${{ hashFiles('**/CMakeLists.txt') }}"
+
       - name: Install Qt6
-        run: sudo apt-get install qt6-default
+        run: |
+          if [ ! -d "/usr/lib/x86_64-linux-gnu/qt6" ]; then
+            sudo apt-get update
+            sudo apt-get install -y qt6-base-dev
+          fi
 
       - name: Configure CMake
         run: cmake -B build_linux -S . -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
@@ -30,7 +40,7 @@ jobs:
         run: cmake --build build_linux --config ${BUILD_TYPE}
 
       - name: Export build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: build_linux
           path: build_linux
@@ -45,11 +55,18 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.inputs.checkoutRef }}
 
-      - name: Set up MSBuild
-        uses: microsoft/setup-msbuild@v2
+      - name: Cache Qt6
+        uses: actions/cache@v4
+        with:
+          path: C:\Qt\Qt6.0.3
+          key: "${{ runner.os }}-qt6-${{ hashFiles('**/CMakeLists.txt') }}"
 
       - name: Install Qt6
-        run: choco install qt6 --params '"/NoDesktopShortcut /NoStartMenuShortcut"'
+        run: |
+          choco install qt6 --params '"/NoAddToPath /NoDesktopShortcuts /NoRegistry"'
+
+      - name: Set up CMake
+        uses: microsoft/setup-msbuild@v2
 
       - name: Configure CMake
         run: cmake -B build_windows -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 16 2019"
@@ -73,8 +90,17 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.inputs.checkoutRef }}
 
+      - name: Cache Qt6
+        uses: actions/cache@v2
+        with:
+          path: /usr/local/Cellar/qt6
+          key: "${{ runner.os }}-qt6-${{ hashFiles('**/CMakeLists.txt') }}"
+
       - name: Install Qt6
-        run: brew install qt@6
+        run: |
+          if [ ! -d "/usr/local/Cellar/qt6" ]; then
+            brew install qt6
+          fi
 
       - name: Configure CMake
         run: cmake -B build_macos -S . -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
