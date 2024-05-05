@@ -68,7 +68,7 @@ jobs:
             cd vcpkg
             .\bootstrap-vcpkg.bat
             .\vcpkg integrate install
-            .\vcpkg install qt6-base:x64-windows
+            .\vcpkg install qtbase:x64-windows
           }
 
       - name: Set up CMake
