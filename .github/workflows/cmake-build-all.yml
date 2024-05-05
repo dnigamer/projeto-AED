@@ -30,7 +30,7 @@ jobs:
         run: |
           if [ ! -d "/usr/lib/x86_64-linux-gnu/qt6" ]; then
             sudo apt-get update
-            sudo apt-get install -y qt6-base-dev
+            sudo apt-get install -y qt6-base-dev libgl1-mesa-dev
           fi
 
       - name: Configure CMake
@@ -63,7 +63,7 @@ jobs:
 
       - name: Install Qt6
         run: |
-          choco install qt6 --params '"/NoAddToPath /NoDesktopShortcuts /NoRegistry"'
+          choco install qt6-base-dev --params '"/NoAddToPath /NoDesktopShortcuts /NoRegistry"'
 
       - name: Set up CMake
         uses: microsoft/setup-msbuild@v2
