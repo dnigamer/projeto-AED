@@ -7,6 +7,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+if (WIN32)
+    set(CMAKE_PREFIX_PATH "C:/Qt/6.2.4")
+endif()
+
 find_package(Qt6 COMPONENTS
         Core
         Gui

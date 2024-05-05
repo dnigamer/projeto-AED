@@ -62,14 +62,7 @@ jobs:
           key: "${{ runner.os }}-qt6-${{ hashFiles('**/CMakeLists.txt') }}"
 
       - name: Install Qt6
-        run: |
-          if (!(Test-Path "C:\Qt")) {
-            git clone https://github.com/microsoft/vcpkg.git
-            cd vcpkg
-            .\bootstrap-vcpkg.bat
-            .\vcpkg integrate install
-            .\vcpkg install qtbase:x64-windows
-          }
+        run: choco install -y qt6-base-dev --version 6.2.4.20240217
 
       - name: Set up CMake
         uses: microsoft/setup-msbuild@v2
