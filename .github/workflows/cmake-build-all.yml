@@ -58,12 +58,18 @@ jobs:
       - name: Cache Qt6
         uses: actions/cache@v4
         with:
-          path: C:\Qt\Qt6.0.3
+          path: C:\Qt
           key: "${{ runner.os }}-qt6-${{ hashFiles('**/CMakeLists.txt') }}"
 
       - name: Install Qt6
         run: |
-          choco install qt6-base-dev --params '"/NoAddToPath /NoDesktopShortcuts /NoRegistry"'
+          if [ ! -d "C:\Qt" ]; then
+            git clone https://github.com/microsoft/vcpkg.git
+            cd vcpkg
+            ./bootstrap-vcpkg.bat
+            ./vcpkg integrate install
+            ./vcpkg install qt6-base:x64-windows
+          fi
 
       - name: Set up CMake
         uses: microsoft/setup-msbuild@v2
@@ -91,7 +97,7 @@ jobs:
           ref: ${{ github.event.inputs.checkoutRef }}
 
       - name: Cache Qt6
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /usr/local/Cellar/qt6
           key: "${{ runner.os }}-qt6-${{ hashFiles('**/CMakeLists.txt') }}"
