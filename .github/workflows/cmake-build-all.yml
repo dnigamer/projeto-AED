@@ -63,13 +63,13 @@ jobs:
 
       - name: Install Qt6
         run: |
-          if not exist "C:\Qt" (
+          if (!(Test-Path "C:\Qt")) {
             git clone https://github.com/microsoft/vcpkg.git
             cd vcpkg
             .\bootstrap-vcpkg.bat
             .\vcpkg integrate install
             .\vcpkg install qt6-base:x64-windows
-          )
+          }
 
       - name: Set up CMake
         uses: microsoft/setup-msbuild@v2
