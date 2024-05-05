@@ -10,7 +10,6 @@ set(CMAKE_AUTOUIC ON)
 if (WIN32)
     set(CMAKE_PREFIX_PATH "C:/Qt/6.2.4/mingw_64/lib/cmake")
     set(QT6_DIR "C:/Qt/6.2.4/mingw_64/lib/cmake/Qt6")
-    target_compile_options(Projeto PUBLIC "/Zc:__cplusplus")
 endif()
 
 find_package(Qt6 COMPONENTS
@@ -31,6 +30,10 @@ target_link_libraries(Projeto
         Qt::Gui
         Qt::Widgets
 )
+
+if (WIN32)
+    target_compile_options(Projeto PRIVATE "/Zc:__cplusplus")
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
