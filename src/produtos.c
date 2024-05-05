@@ -4,33 +4,48 @@
 
 // Cria uma nova instância para a linha de produtos
 // Retorna a linha de produtos
-LinhaProdutos criarLinhaProdutos(unsigned int codigo, char* nome) {
+LinhaProdutos criarLinhaProdutos(char* nome) {
     LinhaProdutos linha;
-    linha.codigo = codigo;
+    linha.linhaID = 0;
     strncpy(linha.nome, nome, 50);
     linha.num_produtos = 0;
     linha.lista_produtos = NULL;
     return linha;
 }
 
-LinhaProdutos* obterLinhaProdutos(StockLoja* stockLoja, int codigo) {
-    ListaLinhaProdutos* atual_linha = stockLoja->lista_linhas;
-    while (atual_linha != NULL) {
-        if (atual_linha->linha->codigo == codigo) {
-            return atual_linha->linha;
+LinhaProdutos* obterLinhaProdutosPorID(StockLoja* stockLoja, int codigo) {
+    ListaLinhaProdutos* current = stockLoja->lista_linhas;
+    while (current != NULL) {
+        if (current->linha->linhaID == codigo) {
+            return (LinhaProdutos *) current->linha;
         }
-        atual_linha = (ListaLinhaProdutos *) atual_linha->prox_linha;
+        current = (ListaLinhaProdutos *) current->prox_linha;
+    }
+    return NULL;
+}
+
+LinhaProdutos* obterLinhaProdutosPorNome(StockLoja* stockLoja, char* nome) {
+    ListaLinhaProdutos* current = stockLoja->lista_linhas;
+    while (current != NULL) {
+        if (strcmp(current->linha->nome, nome) == 0) {
+            return (LinhaProdutos *) current->linha;
+        }
+        current = (ListaLinhaProdutos *) current->prox_linha;
     }
     return NULL;
 }
 
 // Criar linha de produtos dentro do stock da loja
-// Usa stock da loja como pointer e usa linha de produtos a incluir no stock como pointer
-int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha) {
+// Usa stock da loja como pointer e usa uma instância de LinhaProdutos a incluir no stock
+int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos linha) {
     ListaLinhaProdutos* novo_no = (ListaLinhaProdutos*) malloc(sizeof(ListaLinhaProdutos));
     if (novo_no == NULL) return 1;
 
-    novo_no->linha = linha;
+    linha.linhaID = stockLoja->num_linhas + 1;
+    novo_no->linha = (LinhaProdutos *) malloc(sizeof(LinhaProdutos));
+    if (novo_no->linha == NULL) return 1;
+
+    *novo_no->linha = linha;
     novo_no->prox_linha = (struct ListaLinhaProdutos *) stockLoja->lista_linhas;
     stockLoja->lista_linhas = novo_no;
 
@@ -40,21 +55,20 @@ int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha) {
 
 // Remove uma linha de produtos do stock da loja
 // Utiliza o stock da loja como pointer e o código da linha a remover
-int removerLinhaProdutos(StockLoja* stockLoja, int codigo) {
-    if (stockLoja->lista_linhas == NULL) return 1;
-
-    ListaLinhaProdutos* temp = stockLoja->lista_linhas;
-    ListaLinhaProdutos* prev = NULL;
+int removerLinhaProdutos(StockLoja* stockLoja, unsigned int codigoLinha) {
+    if (stockLoja->lista_linhas == NULL) return 1;  // stock sem linhas
+    ListaLinhaProdutos* temp = stockLoja->lista_linhas; // pegar no primeiro no
+    ListaLinhaProdutos* prev = NULL; // nó anterior
 
     // Se o primeiro nó contém a chave a ser excluída
-    if (temp != NULL && temp->linha->codigo == codigo) {
+    if (temp != NULL && temp->linha->linhaID == codigoLinha) {
         stockLoja->lista_linhas = (ListaLinhaProdutos *) temp->prox_linha;
         free(temp);
         return 0;
     }
 
     // Procura a chave a ser excluída, mantendo o nó anterior, pois precisamos alterar 'prev->next'
-    while (temp != NULL && temp->linha->codigo != codigo) {
+    while (temp != NULL && temp->linha->linhaID != codigoLinha) {
         prev = temp;
         temp = (ListaLinhaProdutos *) temp->prox_linha;
     }
@@ -77,7 +91,7 @@ int removerLinhaProdutos(StockLoja* stockLoja, int codigo) {
 int atualizarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha) {
     ListaLinhaProdutos* current = stockLoja->lista_linhas;
     while (current != NULL) {
-        if (current->linha->codigo == linha->codigo) {
+        if (current->linha->linhaID == linha->linhaID) {
             current->linha = linha;
             return 0;
         }
@@ -92,28 +106,99 @@ unsigned int getNumeroLinhasProdutos(StockLoja* stockLoja) {
 }
 
 
+// Retorna a lista de produtos a partir do stock da loja e do código da lista
+ListaProdutos* obterListaProdutosPorIDProduto(StockLoja* stock, int codProduto) {
+    ListaLinhaProdutos* current = stock->lista_linhas;
+    while (current != NULL) {
+        if (current->linha->lista_produtos->produto->listaID == codProduto) {
+            return current->linha->lista_produtos;
+        }
+        current = (ListaLinhaProdutos *) current->prox_linha;
+    }
+    return NULL;
+}
+
+// Retorna a lista de produtos a partir do stock da loja e do código da linha
+ListaProdutos* obterListaProdutosPorIDLinha(StockLoja* stock, int codLinha) {
+    ListaLinhaProdutos* current = stock->lista_linhas;
+    while (current != NULL) {
+        if (current->linha->linhaID == codLinha) {
+            return current->linha->lista_produtos;
+        }
+        current = (ListaLinhaProdutos *) current->prox_linha;
+    }
+    return NULL;
+}
+
+// Retorna a lista de produtos a partir do stock da loja e do nome da linha
+ListaProdutos * obterListaProdutosPorNomeLinha(StockLoja* stock, char* nomeLinha) {
+    ListaLinhaProdutos* current = stock->lista_linhas;
+    while (current != NULL) {
+        if (strcmp(current->linha->nome, nomeLinha) == 0) {
+            return current->linha->lista_produtos;
+        }
+        current = (ListaLinhaProdutos *) current->prox_linha;
+    }
+    return NULL;
+}
+
+ListaProdutos* procurarStockPorNomeProduto(StockLoja* stock, char* nomeItem) {
+    ListaProdutos* produtos = NULL;
+    ListaLinhaProdutos* currentLinha = stock->lista_linhas;
+
+    while (currentLinha != NULL) {
+        ListaProdutos* currentProduto = currentLinha->linha->lista_produtos;
+        while (currentProduto != NULL) {
+            if (strcmp(currentProduto->produto->nome, nomeItem) == 0) {
+                ListaProdutos* newProduto = (ListaProdutos*) malloc(sizeof(ListaProdutos));
+                newProduto->produto = currentProduto->produto;
+                newProduto->prox_produto = produtos;
+                produtos = newProduto;
+            }
+            currentProduto = currentProduto->prox_produto;
+        }
+        currentLinha = currentLinha->prox_linha;
+    }
+
+    return produtos;
+}
+
 // Cria um novo produto usando os parâmetros fornecidos
-// Retorna um struct de produto
-Produto criarProduto(unsigned int codigo, char* nome, char* item, char* modelo, unsigned int quantidade, double preco, ListaParamAdicionaisProduto* parametros) {
+// Retorna instância de produto
+Produto criarProduto(char* nome, char* item, char* modelo, unsigned int quantidade, double preco, ListaParamAdicionaisProduto* parametros) {
     Produto p;
-    p.codigo = codigo;
+    p.listaID = 0;
+    p.linhaID = 0;
+    p.produtoID = 0;
     strncpy(p.nome, nome, 50);
     strncpy(p.item, item, 50);
     strncpy(p.modelo, modelo, 50);
     p.quantidade = quantidade;
     p.preco = preco;
     p.parametros = parametros;
-    return p;
+    return p; // { 0, 0, 0, nome, item, modelo, quantidade, preco, parametros };
 }
 
-// Retorna um produto de uma linha de produtos
-Produto* obterProduto(LinhaProdutos* linha, int codigo) {
-    ListaProduto* current = linha->lista_produtos;
+// Retorna um pointer de produto de uma linha de produtos com base no ID do produto
+Produto* obterProdutoPorID(LinhaProdutos* linha, unsigned int IDProduto) {
+    ListaProdutos* current = linha->lista_produtos;
     while (current != NULL) {
-        if (current->produto->codigo == codigo) {
-            return (Produto *) &current->produto;
+        if (current->produto->produtoID == IDProduto) {
+            return current->produto;
         }
-        current = (ListaProduto *) current->prox_produto;
+        current = (ListaProdutos *) current->prox_produto;
+    }
+    return NULL;
+}
+
+// Retorna um pointer de produto de uma linha de produtos com base no nome do produto
+Produto* obterProdutoPorNome(LinhaProdutos* linha, char* nome) {
+    ListaProdutos* current = linha->lista_produtos;
+    while (current != NULL) {
+        if (strcmp(current->produto->nome, nome) == 0) {
+            return current->produto;
+        }
+        current = (ListaProdutos *) current->prox_produto;
     }
     return NULL;
 }
@@ -123,74 +208,84 @@ Produto* obterProduto(LinhaProdutos* linha, int codigo) {
 // Utiliza a linha de produtos como pointer e o produto a adicionar como pointer
 // Usa o método de push para adicionar um produto a lista dentro da linha de produtos
 int adicionarProduto(LinhaProdutos* linha, Produto* produto) {
-    ListaProduto* novo_no = (ListaProduto*) malloc(sizeof(ListaProduto));
+    ListaProdutos* novo_no = (ListaProdutos*) malloc(sizeof(ListaProdutos));
     if (novo_no == NULL) return 1;
 
+    produto->produtoID = linha->num_produtos + 1;
+    produto->linhaID = linha->linhaID;
     novo_no->produto = produto;
-    novo_no->prox_produto = (struct ListaProduto *) linha->lista_produtos;
-    linha->lista_produtos = novo_no;
 
+    if (linha->lista_produtos != NULL) {
+        novo_no->prox_produto = (struct ListaProdutos *) linha->lista_produtos;
+        novo_no->produto->listaID = linha->lista_produtos->produto->listaID + 1; // Não causa problema se produto anterior tiver sido apagado (conflito IDs)
+    } else {
+        novo_no->prox_produto = NULL; // se nem houver produto a seguir, melhor
+    }
+
+    linha->lista_produtos = novo_no;
     linha->num_produtos++;
+
     return 0;
 }
 
 // Remove um produto de uma linha de produtos
 // Usar metodos de pop para remover
-int removerProduto(LinhaProdutos* linha, int codigo) {
-    if (linha->lista_produtos == NULL || linha->num_produtos == 0)
-        return 1; // Linha vazia
-
-    ListaProduto* atualLista = linha->lista_produtos;
-    ListaProduto* anteriorLista = NULL;
+int removerProduto(LinhaProdutos* linha, int IDproduto) {
+    Produto *prod_anterior = obterProdutoPorID(linha, IDproduto);
+    if (prod_anterior == NULL) return 1;
+    free(prod_anterior);
+    return 0;
+    /*
+    if (linha->lista_produtos == NULL || linha->num_produtos == 0) return 1; // Linha vazia
+    ListaProdutos* atualLista = linha->lista_produtos;
+    ListaProdutos* anteriorLista = NULL;
 
     while (atualLista != NULL) {
-        if (atualLista->produto->codigo == codigo) {
+        if (atualLista->produto->produtoID == IDproduto) {
             if (anteriorLista == NULL) {
-                linha->lista_produtos = (ListaProduto *) atualLista->prox_produto;
+                linha->lista_produtos = (ListaProdutos *) atualLista->prox_produto;
             } else {
-                anteriorLista->prox_produto = (struct ListaProduto *) atualLista->prox_produto;
+                anteriorLista->prox_produto = (struct ListaProdutos *) atualLista->prox_produto;
             }
             free(atualLista);
             return 0;
         }
         anteriorLista = atualLista;
-        atualLista = (ListaProduto *) atualLista->prox_produto;
+        atualLista = (ListaProdutos *) atualLista->prox_produto;
     }
     return 1;
+     */
 }
 
-// Atualiza um produto numa linha de produtos
-// Retorna 0 se o produto foi atualizado com sucesso
-// Retorna 1 se o produto não foi encontrado
+// Atualiza um produto numa linha de produtos com base no ID do produto fornecido
 int atualizarProduto(LinhaProdutos* linha, Produto* produto) {
-    ListaProduto* current = linha->lista_produtos;
-    while (current != NULL) {
-        if (current->produto->codigo == produto->codigo) {
-            current->produto = produto;
-            return 0;
-        }
-        current = (ListaProduto *) current->prox_produto;
-    }
-    return 1;
+    Produto* prod_anterior = (Produto *) obterProdutoPorID(linha, produto->produtoID);
+    if (prod_anterior == NULL) return 1;
+    *prod_anterior = *produto;
+    return 0;
+}
+
+unsigned int getNumeroLinhasStock(StockLoja* stock) {
+    return stock->num_linhas;
 }
 
 // Retorna o número de produtos numa linha de produtos vendo quantos produtos existem em cada lista
-int numeroProdutosLinha(LinhaProdutos* linha) {
-    int count = 0;
-    ListaProduto* current = linha->lista_produtos;
+unsigned int getNumeroProdutosLinha(LinhaProdutos* linha) {
+    unsigned int count = 0;
+    ListaProdutos* current = linha->lista_produtos;
     while (current != NULL) {
         count++;
-        current = (ListaProduto *) current->prox_produto;
+        current = (ListaProdutos *) current->prox_produto;
     }
     return count;
 }
 
 // Retorna o número de produtos total no stock da loja
-int numeroProdutosStock(StockLoja* stock) {
-    int count = 0;
-    ListaLinhaProdutos* current = stock->lista_produtos;
+unsigned int getNumeroProdutosStock(StockLoja* stock) {
+    unsigned int count = 0;
+    ListaLinhaProdutos* current = stock->lista_linhas;
     while (current != NULL) {
-        count += numeroProdutosLinha(current->linha);
+        count += getNumeroProdutosLinha(current->linha);
         current = (ListaLinhaProdutos *) current->prox_linha;
     }
     return count;

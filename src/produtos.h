@@ -22,9 +22,10 @@ typedef struct ListaParamAdicionaisProduto {
 
 
 // definição de struct de produto
-typedef struct 
-{
-    unsigned int codigo;
+typedef struct {
+    unsigned int linhaID;
+    unsigned int listaID;
+    unsigned int produtoID;
     char nome[MAX_CHAR]; // nome inteiro do produto (item + modelo + outros)
     char item[MAX_CHAR];
     char modelo[MAX_CHAR];
@@ -35,18 +36,18 @@ typedef struct
 } Produto;
 
 // definição de struct de lista de produtos para uma linha de produtos
-typedef struct ListaProduto {
+typedef struct ListaProdutos {
     Produto* produto;
-    struct ListaProduto* prox_produto;
-} ListaProduto;
+    struct ListaProdutos* prox_produto;
+} ListaProdutos;
 
 
 // definição de struct de linha de produtos
 typedef struct {
-    unsigned int codigo;
+    unsigned int linhaID;
     char nome[MAX_CHAR];
     unsigned int num_produtos;
-    ListaProduto* lista_produtos;
+    ListaProdutos* lista_produtos;
 } LinhaProdutos;
 
 typedef struct ListaLinhaProdutos {
@@ -62,24 +63,35 @@ typedef struct {
     ListaLinhaProdutos* lista_linhas;
 } StockLoja;
 
+
 // Funções para manipulação de linhas de produtos
-LinhaProdutos criarLinhaProdutos(unsigned int codigo, char* nome);
-LinhaProdutos* obterLinhaProdutos(StockLoja* stockLoja, int codigo);
-int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha);
-int removerLinhaProdutos(StockLoja* stockLoja, int codigo);
+LinhaProdutos criarLinhaProdutos(char* nome);
+LinhaProdutos* obterLinhaProdutosPorID(StockLoja* stockLoja, int codigo);
+LinhaProdutos* obterLinhaProdutosPorNome(StockLoja* stockLoja, char* nome);
+int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos linha);
+int removerLinhaProdutos(StockLoja* stockLoja, unsigned int codigoLinha);
 int atualizarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha);
-unsigned int getNumeroLinhasProdutos(StockLoja* stockLoja);
+
+// Funções para manipulação de listas de produtos
+ListaProdutos* obterListaProdutosPorIDProduto(StockLoja* stock, int codLista);
+ListaProdutos* obterListaProdutosPorIDLinha(StockLoja* stock, int codLinha);
+ListaProdutos* obterListaProdutosPorNomeLinha(StockLoja* stock, char* nomeLinha);
+
+ListaProdutos* procurarStockPorNomeProduto(StockLoja* stock, char* nomeItem);
 
 // Funções para manipulação de produtos
-Produto criarProduto(unsigned int codigo, char* nome, char* item, char* modelo, unsigned int quantidade, double preco, ListaParamAdicionaisProduto* parametros);
-Produto* obterProduto(LinhaProdutos* linha, int codigo);
+Produto criarProduto(char* nome, char* item, char* modelo, unsigned int quantidade, double preco, ListaParamAdicionaisProduto* parametros);
+Produto* obterProdutoPorID(LinhaProdutos* linha, unsigned int IDProduto);
+Produto* obterProdutoPorNome(LinhaProdutos* linha, char* nomeProduto);
 int adicionarProduto(LinhaProdutos* linha, Produto* produto);
 int removerProduto(LinhaProdutos* linha, int codigo);
 int atualizarProduto(LinhaProdutos* linha, Produto* produto);
 
 // Outras funções
-int numeroProdutosLinha(LinhaProdutos* linha);
-int numeroProdutosStock(StockLoja* stock);
+unsigned int getNumeroLinhasProdutos(StockLoja* stockLoja);
+unsigned int getNumeroLinhasStock(StockLoja* stock);
+unsigned int getNumeroProdutosLinha(LinhaProdutos* linha);
+unsigned int getNumeroProdutosStock(StockLoja* stock);
 
 #ifdef __cplusplus
 }

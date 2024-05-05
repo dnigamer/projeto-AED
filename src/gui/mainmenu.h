@@ -18,12 +18,15 @@ class MainMenu : public QMainWindow {
 
 public slots:
 
-    [[maybe_unused]] void onListViewItemClicked(const QModelIndex &index);
+    void onLinhasLVClicked(const QModelIndex &index);
+    void onProdutosLVClicked(const QModelIndex &index);
 
 public:
     explicit MainMenu(QWidget *parent = nullptr);
 
-    void setStock(StockLoja *ptr);
+    void setLinhas(StockLoja *ptr);
+    void setProdutos(LinhaProdutos *ptr);
+    void setModelos(ListaProdutos *ptr);
 
     ~MainMenu() override;
 
@@ -39,7 +42,6 @@ private:
 
     void quit();
 
-    void setItens(LinhaProdutos *ptr);
 };
 
 

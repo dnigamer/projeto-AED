@@ -9,10 +9,12 @@
 
 #ifdef __cplusplus
 extern "C" {
-    void startGui(int argc, char **argv, StockLoja *stockGeral);
-}
 #endif
 
 void startGui(int argc, char *argv[], StockLoja *stockGeral);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

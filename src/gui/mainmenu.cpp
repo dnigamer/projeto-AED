@@ -5,6 +5,9 @@
 #include "ui_MainMenu.h"
 
 StockLoja *stock;
+int selLinha = 0;
+int selProduto = 0;
+int selModelo = 0;
 
 // Função para abrir a base de dados (menu Ficheiro -> Abrir)
 void MainMenu::open()
@@ -86,11 +89,13 @@ MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) 
     ui->menuFicheiro->addAction(actionExit);
 
     // operações sobre ListViews
-    ui->marcasLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->itensLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->linhasLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->produtosLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->modelosLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    connect(ui->marcasLV, &QListView::clicked, this, &MainMenu::onListViewItemClicked);
+    connect(ui->linhasLV, &QListView::clicked, this, &MainMenu::onLinhasLVClicked);
+    connect(ui->produtosLV, &QListView::clicked, this, &MainMenu::onProdutosLVClicked);
+    //connect(ui->modelosLV, &QListView::clicked, this, &MainMenu::onModelosLVClicked);
 
     // Adicionar logo no sitio logoLoja
     if (!QFile::exists("logo.png")) {
@@ -103,9 +108,7 @@ MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) 
         ui->logoLoja->setScaledContents(true);
     }
 
-    // Mostar mensagem de "Ready" na barra de estado
-    if (!problemas)
-        statusBar()->showMessage("Pronto");
+    if (!problemas) statusBar()->showMessage("Pronto");
 }
 
 MainMenu::~MainMenu()
@@ -113,44 +116,95 @@ MainMenu::~MainMenu()
     delete ui;
 }
 
-void MainMenu::setStock(StockLoja *ptr) {
-    // TODO: Implementar a função para mostrar os produtos
-    stock = ptr;
+void MainMenu::setLinhas(StockLoja *ptr) {
+    if (ptr == nullptr) return;
 
+    stock = ptr;
     ui->nomeLojaLab->setText(ptr->nome);
-    auto *model = new QStringListModel(this);
+
     QStringList list;
-    for (int i = 0; i < ptr->num_linhas; i++) {
-        LinhaProdutos linha = ptr->linhas[i];
+    ListaLinhaProdutos *current = ptr->lista_linhas;
+    while (current != nullptr) {
+        LinhaProdutos linha = *current->linha;
         QString linhaStr = linha.nome;
         list << linhaStr;
+        current = (ListaLinhaProdutos *) current->prox_linha;
     }
-    model->setStringList(list);
-    ui->marcasLV->setModel(model);
 
-    connect(ui->marcasLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onListViewItemClicked);
+    std::reverse(list.begin(), list.end());
+
+    auto *model = new QStringListModel(this);
+    model->setStringList(list);
+    ui->linhasLV->setModel(model);
+
+    if (list.empty()) return;
+    if (ui->linhasLV->selectionModel() == nullptr) return;
+    connect(ui->linhasLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onLinhasLVClicked);
 }
 
-void MainMenu::setItens(LinhaProdutos *ptr) {
+void MainMenu::setProdutos(LinhaProdutos *ptr) {
+    if (ptr == nullptr) return;
+
     auto *model = new QStringListModel(this);
     QStringList list;
-    Node *current = ptr->top;
+    QSet<QString> uniqueNames;
+
+    ListaProdutos *current = ptr->lista_produtos;
     while (current != nullptr) {
-        Produto produto = current->produto;
+        Produto produto = *current->produto;
         QString produtoStr = produto.nome;
-        list << produtoStr;
-        current = current->next;
+        if (!uniqueNames.contains(produtoStr)) {
+            list << produtoStr;
+            uniqueNames.insert(produtoStr);
+        }
+        current = (ListaProdutos *) current->prox_produto;
     }
+
     model->setStringList(list);
-    ui->itensLV->setModel(model);
+    ui->produtosLV->setModel(model);
+
+    if (list.empty()) return;
+    if (ui->modelosLV->selectionModel() == nullptr) return;
+    connect(ui->modelosLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onProdutosLVClicked);
+}
+
+void MainMenu::setModelos(ListaProdutos *ptr) {
+    if (ptr == nullptr) ui->modelosLV->setModel(nullptr);
+
+    auto *model = new QStringListModel(this);
+    QStringList list;
+
+    ListaProdutos *current = ptr;
+    while (current != nullptr) {
+        Produto produto = *current->produto;
+        QString produtoStr = produto.modelo;
+        list << produtoStr;
+        current = (ListaProdutos *) current->prox_produto;
+    }
+
+    model->setStringList(list);
+    ui->modelosLV->setModel(model);
+
+    if (list.empty()) return;
+    //if (ui->modelosLV->selectionModel() == nullptr) return;
+    //connect(ui->modelosLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onProdutosLVClicked);
 }
 
 
-void MainMenu::onListViewItemClicked(const QModelIndex &index) {
-    int linhaStock = index.row();
-    auto linha = (LinhaProdutos) obterLinhaProdutos(stock, linhaStock + 1);
-    // call for setItens with the corresponding LinhaProdutos
-    setItens(&linha);
+void MainMenu::onLinhasLVClicked(const QModelIndex &index) {
+    selLinha = index.row();
+    auto linha = (LinhaProdutos *) obterLinhaProdutosPorID(stock, selLinha + 1);
+    setProdutos(linha);
+    setModelos(nullptr);
+}
+
+void MainMenu::onProdutosLVClicked(const QModelIndex &index) {
+    QAbstractItemModel* model = ui->produtosLV->model();
+    QString text = model->data(index, Qt::DisplayRole).toString();
+    std::string nomeStd = text.toStdString();
+    char* nome = const_cast<char*>(nomeStd.c_str());
+    auto lista = (ListaProdutos *) procurarStockPorNomeProduto(stock, nome);
+    setModelos(lista);
 }
 
 #ifdef Q_OS_MACOS
