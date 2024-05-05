@@ -9,6 +9,7 @@ set(CMAKE_AUTOUIC ON)
 
 if (WIN32)
     set(CMAKE_PREFIX_PATH "C:/Qt/6.2.4")
+    set(QT6_DIR "C:/Qt/6.2.4/mingw_64/lib/cmake/Qt6")
 endif()
 
 find_package(Qt6 COMPONENTS
