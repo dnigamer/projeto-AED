@@ -26,101 +26,24 @@
    <string>MainMenu</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="groupBoxPesquisa">
-    <property name="geometry">
-     <rect>
-      <x>439</x>
-      <y>15</y>
-      <width>471</width>
-      <height>50</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>500</width>
-      <height>100</height>
-     </size>
-    </property>
-    <property name="title">
-     <string/>
-    </property>
-    <widget class="QComboBox" name="categoriaCB">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>11</y>
-       <width>130</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="editable">
-      <bool>false</bool>
-     </property>
-     <property name="currentText">
-      <string/>
-     </property>
-     <property name="placeholderText">
-      <string>Tipo</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="produtoTE">
-     <property name="geometry">
-      <rect>
-       <x>200</x>
-       <y>12</y>
-       <width>160</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="placeholderText">
-      <string>Produto</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="textLab">
-     <property name="geometry">
-      <rect>
-       <x>14</x>
-       <y>14</y>
-       <width>55</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Pesquisa</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="procuraBtn">
-     <property name="geometry">
-      <rect>
-       <x>370</x>
-       <y>10</y>
-       <width>90</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Procurar</string>
-     </property>
-    </widget>
-   </widget>
    <widget class="QLabel" name="nomeLojaLab">
     <property name="geometry">
      <rect>
       <x>100</x>
       <y>15</y>
-      <width>300</width>
+      <width>800</width>
       <height>50</height>
      </rect>
     </property>
     <property name="maximumSize">
      <size>
-      <width>300</width>
+      <width>800</width>
       <height>300</height>
      </size>
     </property>
     <property name="font">
      <font>
-      <pointsize>30</pointsize>
+      <pointsize>28</pointsize>
      </font>
     </property>
     <property name="text">
@@ -160,7 +83,7 @@
      <enum>Qt::TextFormat::AutoText</enum>
     </property>
     <property name="pixmap">
-     <pixmap>../../../../../../../.designer/backup/logo.png</pixmap>
+     <pixmap>../../../../../../../../../../../../.designer/backup/logo.png</pixmap>
     </property>
    </widget>
    <widget class="QTabWidget" name="tabWidget">
@@ -169,13 +92,13 @@
       <x>10</x>
       <y>80</y>
       <width>900</width>
-      <height>580</height>
+      <height>581</height>
      </rect>
     </property>
     <property name="currentIndex">
      <number>0</number>
     </property>
-    <widget class="QWidget" name="vistageral">
+    <widget class="QWidget" name="tabVistaGeral">
      <attribute name="title">
       <string>Vista geral</string>
      </attribute>
@@ -322,7 +245,7 @@
         <string>Quantidade</string>
        </property>
       </widget>
-      <widget class="QGroupBox" name="groupBox">
+      <widget class="QGroupBox" name="outrosparamGB">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -334,7 +257,7 @@
        <property name="title">
         <string>Outros parâmetros</string>
        </property>
-       <widget class="QTableView" name="tableView">
+       <widget class="QTableWidget" name="tableWidget_2">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -343,6 +266,22 @@
           <height>120</height>
          </rect>
         </property>
+        <attribute name="horizontalHeaderHighlightSections">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="verticalHeaderMinimumSectionSize">
+         <number>21</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Nome</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Valor</string>
+         </property>
+        </column>
        </widget>
       </widget>
      </widget>
@@ -554,7 +493,7 @@
       </widget>
      </widget>
     </widget>
-    <widget class="QWidget" name="pesquisa">
+    <widget class="QWidget" name="tabPesquisa">
      <attribute name="title">
       <string>Pesquisa</string>
      </attribute>
@@ -568,7 +507,7 @@
        </rect>
       </property>
       <property name="placeholderText">
-       <string>Produto</string>
+       <string>Valor</string>
       </property>
      </widget>
      <widget class="QPushButton" name="procuraBtn_2">
@@ -584,7 +523,7 @@
        <string>Procurar</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="categoriaCB_2">
+     <widget class="QComboBox" name="catPesqDD">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -600,14 +539,39 @@
        <string/>
       </property>
       <property name="placeholderText">
-       <string>Tipo</string>
+       <string>Selecionar</string>
       </property>
+      <item>
+       <property name="text">
+        <string>Código</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Produto</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Lista</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Modelo</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Parâmetro</string>
+       </property>
+      </item>
      </widget>
-     <widget class="QGroupBox" name="groupBox_6">
+     <widget class="QGroupBox" name="resultPesqGB">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>80</y>
+        <y>90</y>
         <width>875</width>
         <height>450</height>
        </rect>
@@ -615,17 +579,7 @@
       <property name="title">
        <string>Resultado da pesquisa</string>
       </property>
-      <widget class="QListView" name="listView">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>850</width>
-         <height>381</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="ordenarLab">
        <property name="geometry">
         <rect>
          <x>15</x>
@@ -638,13 +592,54 @@
         <string>Ordenar</string>
        </property>
       </widget>
+      <widget class="QTableWidget" name="tableWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>850</width>
+         <height>410</height>
+        </rect>
+       </property>
+       <property name="rowCount">
+        <number>0</number>
+       </property>
+       <property name="columnCount">
+        <number>5</number>
+       </property>
+       <column>
+        <property name="text">
+         <string>Código Interno</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Nome</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Modelo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Quantidade</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Preço</string>
+        </property>
+       </column>
+      </widget>
      </widget>
     </widget>
-    <widget class="QWidget" name="definicoes">
+    <widget class="QWidget" name="tabDefinicoes">
      <attribute name="title">
       <string>Definições</string>
      </attribute>
-     <widget class="QGroupBox" name="groupBox_2">
+     <widget class="QGroupBox" name="propGB">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -656,7 +651,7 @@
       <property name="title">
        <string>Propriedades da loja</string>
       </property>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="nomeLojaModLab">
        <property name="geometry">
         <rect>
          <x>15</x>
@@ -669,7 +664,7 @@
         <string>Nome da loja</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit">
+      <widget class="QLineEdit" name="nomeLojaModText">
        <property name="geometry">
         <rect>
          <x>195</x>
@@ -679,7 +674,7 @@
         </rect>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="nomeLojaModBtn">
        <property name="geometry">
         <rect>
          <x>750</x>
@@ -692,7 +687,7 @@
         <string>Aplicar</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="nomeLogoModBtn">
        <property name="geometry">
         <rect>
          <x>750</x>
@@ -705,7 +700,7 @@
         <string>Aplicar</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="nomeLogoModLab">
        <property name="geometry">
         <rect>
          <x>15</x>
@@ -718,7 +713,7 @@
         <string>Nome do lógotipo</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_2">
+      <widget class="QLineEdit" name="nomeLogoModText">
        <property name="geometry">
         <rect>
          <x>195</x>
@@ -729,7 +724,7 @@
        </property>
       </widget>
      </widget>
-     <widget class="QGroupBox" name="groupBox_3">
+     <widget class="QGroupBox" name="stockGB">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -741,7 +736,7 @@
       <property name="title">
        <string/>
       </property>
-      <widget class="QGroupBox" name="groupBox_4">
+      <widget class="QGroupBox" name="infoStockGB">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -753,7 +748,7 @@
        <property name="title">
         <string>Informações de stock</string>
        </property>
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="numLinhasStockLab">
         <property name="geometry">
          <rect>
           <x>15</x>
@@ -766,7 +761,7 @@
          <string>Número de linhas de produtos</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="numProdutosStockLbl">
         <property name="geometry">
          <rect>
           <x>15</x>
@@ -779,7 +774,7 @@
          <string>Número total de produtos</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="numTiposStockLab">
         <property name="geometry">
          <rect>
           <x>15</x>
@@ -792,7 +787,7 @@
          <string>Número de tipos de produtos</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_3">
+       <widget class="QLineEdit" name="numLinhasStockText">
         <property name="geometry">
          <rect>
           <x>220</x>
@@ -801,8 +796,11 @@
           <height>25</height>
          </rect>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_4">
+       <widget class="QLineEdit" name="numTiposStockText">
         <property name="geometry">
          <rect>
           <x>220</x>
@@ -811,8 +809,11 @@
           <height>25</height>
          </rect>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_5">
+       <widget class="QLineEdit" name="numProdutosStockText">
         <property name="geometry">
          <rect>
           <x>220</x>
@@ -821,8 +822,11 @@
           <height>25</height>
          </rect>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="atualizarStockInfo">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -836,7 +840,7 @@
         </property>
        </widget>
       </widget>
-      <widget class="QGroupBox" name="groupBox_5">
+      <widget class="QGroupBox" name="opStockGB">
        <property name="geometry">
         <rect>
          <x>445</x>
@@ -848,7 +852,7 @@
        <property name="title">
         <string>Operações sobre o stock</string>
        </property>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="apagaLinhasStockBtn">
         <property name="geometry">
          <rect>
           <x>250</x>
@@ -861,7 +865,7 @@
          <string>Confirmar</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="apagaLinhasStockText">
         <property name="geometry">
          <rect>
           <x>15</x>
@@ -874,7 +878,7 @@
          <string>Apagar todas as linhas de produtos</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="apagaProdutosStockText">
         <property name="geometry">
          <rect>
           <x>15</x>
@@ -887,7 +891,7 @@
          <string>Apagar todos os produtos das linhas</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pushButton_4">
+       <widget class="QPushButton" name="apagaProdutosStockBtn">
         <property name="geometry">
          <rect>
           <x>250</x>
@@ -923,11 +927,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <tabstops>
-  <tabstop>categoriaCB</tabstop>
-  <tabstop>produtoTE</tabstop>
-  <tabstop>procuraBtn</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

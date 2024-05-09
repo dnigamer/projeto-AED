@@ -42,11 +42,6 @@ int main(int argc, char *argv[])
     Produto produto4 = { 0, 0, 0, "Pera", "Fruta", "Rocha", 10, 0.5, 0, NULL };
     adicionarProduto(obterLinhaProdutosPorID(&stockGeral, 2), &produto4);
 
-    printf("Numero de produtos na linha: %d\n", getNumeroProdutosLinha(obterLinhaProdutosPorID(&stockGeral, 2)));
-    printf("Numero de produtos no stock: %d\n", getNumeroProdutosStock(&stockGeral));
-
-    printf("");
-
     // chama a função para iniciar a GUI
     startGui(argc, argv, &stockGeral);
     system(CLEAR);

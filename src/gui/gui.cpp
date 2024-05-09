@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QFile>
 #include "mainmenu.h"
 #include "gui.h"
 
@@ -7,6 +8,12 @@ void startGui(int argc, char **argv, StockLoja *stockGeral) {
     MainMenu mainMenu;
     mainMenu.setWindowTitle("Gestão de Stock - " + QString(stockGeral->nome));
     mainMenu.setLinhas(stockGeral);
+
+    //QFile file("MacOS.qss");
+    //file.open(QFile::ReadOnly);
+    //QString style( file.readAll() );
+    //app.setStyleSheet( style );
+
     mainMenu.show();
     QApplication::exec();
 }
