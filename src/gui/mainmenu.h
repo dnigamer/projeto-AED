@@ -21,12 +21,20 @@ public slots:
     void onLinhasLVClicked(const QModelIndex &index);
     void onProdutosLVClicked(const QModelIndex &index);
 
+    void onAtualizarStockInfoBtnClicked();
+    void onNomeLojaModBtnClicked();
+
+
 public:
     explicit MainMenu(QWidget *parent = nullptr);
 
+    void setStock(StockLoja *stock);
     void setLinhas(StockLoja *ptr);
     void setProdutos(LinhaProdutos *ptr);
     void setModelos(ListaProdutos *ptr);
+    void tabDefinicoes();
+
+    void reloadTabs();
 
     ~MainMenu() override;
 
@@ -42,6 +50,7 @@ private:
 
     void quit();
 
+    void onTabChanged(int index);
 };
 
 

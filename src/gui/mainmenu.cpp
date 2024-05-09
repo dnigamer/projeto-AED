@@ -93,9 +93,17 @@ MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) 
     ui->produtosLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->modelosLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
+    // Listeners para ListViews
     connect(ui->linhasLV, &QListView::clicked, this, &MainMenu::onLinhasLVClicked);
     connect(ui->produtosLV, &QListView::clicked, this, &MainMenu::onProdutosLVClicked);
     //connect(ui->modelosLV, &QListView::clicked, this, &MainMenu::onModelosLVClicked);
+
+    // Listeners para botoes
+    connect(ui->nomeLojaModBtn, &QPushButton::clicked, this, &MainMenu::onNomeLojaModBtnClicked);
+    connect(ui->atualizarStockInfoBtn, &QPushButton::clicked, this, &MainMenu::onAtualizarStockInfoBtnClicked);
+
+    // Listeners para tabgroups
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainMenu::onTabChanged);
 
     // Adicionar logo no sitio logoLoja
     if (!QFile::exists("logo.png")) {
@@ -116,11 +124,14 @@ MainMenu::~MainMenu()
     delete ui;
 }
 
-void MainMenu::setLinhas(StockLoja *ptr) {
+void MainMenu::setStock(StockLoja *ptr) {
     if (ptr == nullptr) return;
-
     stock = ptr;
     ui->nomeLojaLab->setText(ptr->nome);
+}
+
+void MainMenu::setLinhas(StockLoja *ptr) {
+    if (ptr == nullptr) return;
 
     QStringList list;
     ListaLinhaProdutos *current = ptr->lista_linhas;
@@ -190,6 +201,16 @@ void MainMenu::setModelos(ListaProdutos *ptr) {
     //connect(ui->modelosLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onProdutosLVClicked);
 }
 
+void MainMenu::tabDefinicoes() {
+    ui->nomeLojaModText->setText(ui->nomeLojaLab->text());
+    ui->numLinhasStockText->setText(QString::number(stock->num_linhas));
+    ui->numTiposStockText->setText(QString::number(getNumeroTipoProdutosStock(stock)));
+    ui->numProdutosStockText->setText(QString::number(getNumeroProdutosStock(stock)));
+}
+
+void MainMenu::reloadTabs() {
+    tabDefinicoes();
+}
 
 void MainMenu::onLinhasLVClicked(const QModelIndex &index) {
     selLinha = index.row();
@@ -205,6 +226,31 @@ void MainMenu::onProdutosLVClicked(const QModelIndex &index) {
     char* nome = const_cast<char*>(nomeStd.c_str());
     auto lista = (ListaProdutos *) procurarStockPorNomeProduto(stock, nome);
     setModelos(lista);
+}
+
+void MainMenu::onNomeLojaModBtnClicked() {
+    QString newName = ui->nomeLojaModText->text();
+    if (newName.isEmpty()) return;
+    int resultado = editarStockLoja(stock, newName.toStdString().c_str());
+    if (resultado == 0) {
+        ui->statusbar->showMessage("ERRO!! - Erro ao alterar o nome da loja");
+        return;
+    }
+    ui->nomeLojaLab->setText(newName);
+    ui->nomeLojaModText->clear();
+    window()->setWindowTitle("Gestão de Stock - " + newName);
+    ui->statusbar->showMessage("Nome da loja alterado para " + newName);
+}
+
+
+void MainMenu::onAtualizarStockInfoBtnClicked() {
+    tabDefinicoes();
+}
+
+void MainMenu::onTabChanged(int index) {
+    if (index == 2) { // definições
+        tabDefinicoes();
+    }
 }
 
 #ifdef Q_OS_MACOS

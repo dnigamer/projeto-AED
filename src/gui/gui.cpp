@@ -8,6 +8,8 @@ void startGui(int argc, char **argv, StockLoja *stockGeral) {
     MainMenu mainMenu;
     mainMenu.setWindowTitle("Gestão de Stock - " + QString(stockGeral->nome));
     mainMenu.setLinhas(stockGeral);
+    mainMenu.setStock(stockGeral);
+    mainMenu.reloadTabs();
 
     //QFile file("MacOS.qss");
     //file.open(QFile::ReadOnly);

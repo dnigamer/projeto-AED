@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "src/produtos.h"
-#include "src/gui/gui.h"
+#include "produtos.h"
+#include "gui/gui.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #define CLEAR "cls"

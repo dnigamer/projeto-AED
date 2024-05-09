@@ -2,6 +2,25 @@
 #include <string.h>
 #include <stdlib.h>
 
+// Cria uma nova instância de stock da loja
+// Retorna o stock da loja
+StockLoja criarStockLoja(char* nome) {
+    StockLoja stock;
+    strncpy(stock.nome, nome, 20);
+    stock.num_linhas = 0;
+    stock.lista_linhas = NULL;
+    return stock;
+}
+
+int editarStockLoja(StockLoja* stockLoja, const char* nome) {
+    char *nomeStock = (char *) malloc(20);  // resolve problema com ponteiro constante
+    if (nomeStock == NULL) return 1;
+    strncpy(nomeStock, nome, 20);
+    strncpy(stockLoja->nome, nomeStock, 20);
+    free(nomeStock);
+    return 0;
+}
+
 // Cria uma nova instância para a linha de produtos
 // Retorna a linha de produtos
 LinhaProdutos criarLinhaProdutos(char* nome) {
@@ -290,3 +309,110 @@ unsigned int getNumeroProdutosStock(StockLoja* stock) {
     }
     return count;
 }
+
+// Dá merge a duas listas de produtos (usado por mergeSort para getNumeroTipoProdutosStock)
+ListaProdutos* sortedMerge(ListaProdutos* a, ListaProdutos* b) {
+    ListaProdutos* result = NULL;
+
+    // casos base
+    if (a == NULL)
+        return b;
+    else if (b == NULL)
+        return a;
+
+    // escolher entre a ou b e retornar recursivamente
+    if (strcmp(a->produto->nome, b->produto->nome) <= 0) {
+        result = a;
+        result->prox_produto = sortedMerge(a->prox_produto, b);
+    } else {
+        result = b;
+        result->prox_produto = sortedMerge(a, b->prox_produto);
+    }
+
+    return result;
+}
+
+// Função para dividir a lista de produtos em duas e partir dai
+void split(ListaProdutos* fonte, ListaProdutos** frontRef, ListaProdutos** backRef) {
+    ListaProdutos* rapido;
+    ListaProdutos* lento;
+    lento = fonte;
+    rapido = fonte->prox_produto;
+
+    while (rapido != NULL) {
+        rapido = rapido->prox_produto;
+        if (rapido != NULL) {
+            lento = lento->prox_produto;
+            rapido = rapido->prox_produto;
+        }
+    }
+
+    *frontRef = fonte;
+    *backRef = lento->prox_produto;
+    lento->prox_produto = NULL;
+}
+
+// Função para ordenar a lista de produtos usando o merge sort
+void mergeSort(ListaProdutos** headRef) {
+    ListaProdutos* head = *headRef;
+    ListaProdutos* a;
+    ListaProdutos* b;
+
+    if ((head == NULL) || (head->prox_produto == NULL)) {
+        return;
+    }
+
+    split(head, &a, &b);
+
+    // Recursivamente ordenar as sublistas
+    mergeSort(&a);
+    mergeSort(&b);
+
+    *headRef = sortedMerge(a, b);
+}
+
+// Nó de tipo para contar tipos de produtos (Lista ligada)
+typedef struct TipoNode {
+    char tipo[MAX_CHAR];
+    struct TipoNode* next;
+} TipoNode;
+
+unsigned int getNumeroTipoProdutosStock(StockLoja* stock) {
+    unsigned int contagem = 0;
+    TipoNode* tiposContados = NULL;
+
+    ListaLinhaProdutos* linhaAtual = stock->lista_linhas;
+    while (linhaAtual != NULL) {
+        ListaProdutos* produtoAtual = linhaAtual->linha->lista_produtos;
+        while (produtoAtual != NULL) {
+            TipoNode* tipoAtual = tiposContados;
+            while (tipoAtual != NULL) {
+                if (strcmp(tipoAtual->tipo, produtoAtual->produto->nome) == 0) {
+                    break;
+                }
+                tipoAtual = tipoAtual->next;
+            }
+            if (tipoAtual == NULL) {
+                TipoNode* novoTipo = (TipoNode*) malloc(sizeof(TipoNode));
+                if (novoTipo == NULL) {
+                    TipoNode* tipoAtualNodes = tiposContados;
+                    while (tipoAtualNodes != NULL) {
+                        TipoNode* nextType = tipoAtualNodes->next;
+                        free(tipoAtualNodes);
+                        tipoAtualNodes = nextType;
+                    }
+                    return contagem;
+                }
+                strncpy(novoTipo->tipo, produtoAtual->produto->nome, MAX_CHAR);
+                novoTipo->next = tiposContados;
+                tiposContados = novoTipo;
+                contagem++;
+            }
+            produtoAtual = produtoAtual->prox_produto;
+        }
+        linhaAtual = linhaAtual->prox_linha;
+    }
+
+    return contagem;
+}
+
