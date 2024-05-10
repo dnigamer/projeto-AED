@@ -40,7 +40,7 @@ cmake -Bbuild_windows -S. -G $GENERATOR -A x64
 # Fazer a build
 cmake --build build_windows --config $BUILD_TYPE
 
-# Copiar DLLs em falta para a pasta do execut·vel
+# Copiar DLLs em falta para a pasta do execut√°vel
 Write-Host "A copiar DLLs em falta"
 if (Test-Path "build_windows\$BUILD_TYPE\") {
     Copy-Item "vcpkg\installed\x64-windows\bin\double-conversion.dll" -Destination "build_windows\$BUILD_TYPE" -Force
