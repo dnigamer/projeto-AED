@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "produtos.h"
+#include "operacoes.h"
 #include "gui/gui.h"
 
 #if defined(_WIN32) || defined(_WIN64)

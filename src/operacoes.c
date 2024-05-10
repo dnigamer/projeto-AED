@@ -1,4 +1,8 @@
-#include "produtos.h"
+//
+// Created by Gonçalo Miranda on 10/05/2024.
+//
+
+#include "operacoes.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -12,6 +16,7 @@ StockLoja criarStockLoja(char* nome) {
     return stock;
 }
 
+// Adiciona a funcionalidade de editar o nome da loja partindo do pointer e de uma string com o novo nome
 int editarStockLoja(StockLoja* stockLoja, const char* nome) {
     char *nomeStock = (char *) malloc(20);  // resolve problema com ponteiro constante
     if (nomeStock == NULL) return 1;
@@ -20,6 +25,7 @@ int editarStockLoja(StockLoja* stockLoja, const char* nome) {
     free(nomeStock);
     return 0;
 }
+
 
 // Cria uma nova instância para a linha de produtos
 // Retorna a linha de produtos

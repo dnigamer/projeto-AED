@@ -7,7 +7,7 @@
 
 #include <QWidget>
 #include <QMainWindow>
-#include "../produtos.h"
+#include "../operacoes.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainMenu; }
@@ -23,6 +23,8 @@ public slots:
 
     void onAtualizarStockInfoBtnClicked();
     void onNomeLojaModBtnClicked();
+    void onApagaLinhasStockBtnClicked();
+    void onApagaProdutosStockBtnClicked();
 
 
 public:
@@ -32,8 +34,8 @@ public:
     void setLinhas(StockLoja *ptr);
     void setProdutos(LinhaProdutos *ptr);
     void setModelos(ListaProdutos *ptr);
-    void tabDefinicoes();
 
+    void tabDefinicoes();
     void reloadTabs();
 
     ~MainMenu() override;

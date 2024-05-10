@@ -99,11 +99,14 @@ MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) 
     //connect(ui->modelosLV, &QListView::clicked, this, &MainMenu::onModelosLVClicked);
 
     // Listeners para botoes
+    // Tab Definições
     connect(ui->nomeLojaModBtn, &QPushButton::clicked, this, &MainMenu::onNomeLojaModBtnClicked);
     connect(ui->atualizarStockInfoBtn, &QPushButton::clicked, this, &MainMenu::onAtualizarStockInfoBtnClicked);
+    connect(ui->apagaLinhasStockBtn, &QPushButton::clicked, this, &MainMenu::onApagaLinhasStockBtnClicked);
+    connect(ui->apagaProdutosStockBtn, &QPushButton::clicked, this, &MainMenu::onApagaProdutosStockBtnClicked);
 
     // Listeners para tabgroups
-    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainMenu::onTabChanged);
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainMenu::onTabChanged); // mudança de tab
 
     // Adicionar logo no sitio logoLoja
     if (!QFile::exists("logo.png")) {
@@ -245,6 +248,15 @@ void MainMenu::onNomeLojaModBtnClicked() {
 
 void MainMenu::onAtualizarStockInfoBtnClicked() {
     tabDefinicoes();
+}
+
+void MainMenu::onApagaLinhasStockBtnClicked() {
+    ui->statusbar->showMessage("Ação apagar linhas de stock");
+
+}
+
+void MainMenu::onApagaProdutosStockBtnClicked() {
+    ui->statusbar->showMessage("Ação apagar produtos de stock");
 }
 
 void MainMenu::onTabChanged(int index) {

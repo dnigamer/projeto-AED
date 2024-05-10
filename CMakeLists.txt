@@ -26,13 +26,14 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
 
-add_executable(Projeto main.c
-        src/produtos.c
+add_executable(Projeto src/main.c
         src/produtos.h
         src/gui/gui.cpp
         src/gui/gui.h
         src/gui/mainmenu.cpp
         src/gui/mainmenu.h
+        src/operacoes.c
+        src/operacoes.h
 )
 
 message("-- Linking Qt6")
