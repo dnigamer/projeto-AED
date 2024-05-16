@@ -12,25 +12,25 @@ extern "C" {
 #endif
 
 LinhaProdutos *peekListaLinhaProdutos(ListaLinhaProdutos*);
-void pushListaLinhaProdutos(ListaLinhaProdutos*, LinhaProdutos*);
-LinhaProdutos *popListaLinhaProdutos(ListaLinhaProdutos*);
+void pushListaLinhaProdutos(ListaLinhaProdutos**, LinhaProdutos*);
+LinhaProdutos *popListaLinhaProdutos(ListaLinhaProdutos**);
 ListaLinhaProdutos *createListaLinhaProdutos();
-void destroyListaLinhaProdutos(ListaLinhaProdutos*);
 int isEmptyListaLinhaProdutos(ListaLinhaProdutos*);
+void destroyListaLinhaProdutos(ListaLinhaProdutos**);
 
 Produto *peekListaProdutos(ListaProdutos*);
-void pushListaProdutos(ListaProdutos*, Produto*);
-Produto *popListaProdutos(ListaProdutos*);
+void pushListaProdutos(ListaProdutos**, Produto*);
+Produto *popListaProdutos(ListaProdutos**);
 ListaProdutos *createListaProdutos();
-void destroyListaProdutos(ListaProdutos*);
 int isEmptyListaProdutos(ListaProdutos*);
+void destroyListaProdutos(ListaProdutos**);
 
 ParamAdicionaisProduto *peekListaParamAdicionaisProduto(ListaParamAdicionaisProduto*);
-void pushListaParamAdicionaisProduto(ListaParamAdicionaisProduto*, ParamAdicionaisProduto*);
-ParamAdicionaisProduto *popListaParamAdicionaisProduto(ListaParamAdicionaisProduto*);
+void pushListaParamAdicionaisProduto(ListaParamAdicionaisProduto**, ParamAdicionaisProduto*);
+ParamAdicionaisProduto *popListaParamAdicionaisProduto(ListaParamAdicionaisProduto**);
 ListaParamAdicionaisProduto *createListaParamAdicionaisProduto();
-void destroyListaParamAdicionaisProduto(ListaParamAdicionaisProduto*);
 int isEmptyListaParamAdicionaisProduto(ListaParamAdicionaisProduto*);
+void destroyListaParamAdicionaisProduto(ListaParamAdicionaisProduto**);
 
 
 #ifdef __cplusplus
