@@ -52,6 +52,7 @@ void apagarProdutosLinhasStock(StockLoja* stockLoja) {
     }
 }
 
+
 // Cria uma nova instância para a linha de produtos
 // Retorna a linha de produtos
 LinhaProdutos criarLinhaProdutos(char* nome) {
@@ -263,13 +264,12 @@ int adicionarProduto(LinhaProdutos* linha, Produto* produto) {
 
     produto->produtoID = linha->num_produtos + 1;
     produto->linhaID = linha->linhaID;
-    novo_no->produto = produto;
 
+    novo_no->produto = produto;
+    novo_no->prox_produto = NULL;
     if (linha->lista_produtos != NULL) {
         novo_no->prox_produto = (struct ListaProdutos *) linha->lista_produtos;
         novo_no->produto->listaID = linha->lista_produtos->produto->listaID + 1; // Não causa problema se produto anterior tiver sido apagado (conflito IDs)
-    } else {
-        novo_no->prox_produto = NULL; // se nem houver produto a seguir, melhor
     }
 
     linha->lista_produtos = novo_no;
@@ -281,30 +281,14 @@ int adicionarProduto(LinhaProdutos* linha, Produto* produto) {
 // Remove um produto de uma linha de produtos
 // Usar metodos de pop para remover
 int removerProduto(LinhaProdutos* linha, int IDproduto) {
-    Produto *prod_anterior = obterProdutoPorID(linha, IDproduto);
-    if (prod_anterior == NULL) return 1;
-    free(prod_anterior);
-    return 0;
-    /*
-    if (linha->lista_produtos == NULL || linha->num_produtos == 0) return 1; // Linha vazia
-    ListaProdutos* atualLista = linha->lista_produtos;
-    ListaProdutos* anteriorLista = NULL;
-
-    while (atualLista != NULL) {
-        if (atualLista->produto->produtoID == IDproduto) {
-            if (anteriorLista == NULL) {
-                linha->lista_produtos = (ListaProdutos *) atualLista->prox_produto;
-            } else {
-                anteriorLista->prox_produto = (struct ListaProdutos *) atualLista->prox_produto;
-            }
-            free(atualLista);
-            return 0;
-        }
-        anteriorLista = atualLista;
-        atualLista = (ListaProdutos *) atualLista->prox_produto;
+    ListaProdutos* temp = linha->lista_produtos;
+    // implement using stack pop
+    if (temp != NULL && temp->produto->produtoID == IDproduto) {
+        linha->lista_produtos = (ListaProdutos *) temp->prox_produto;
+        free(temp);
+        return 0;
     }
-    return 1;
-     */
+    return 0;
 }
 
 // Atualiza um produto numa linha de produtos com base no ID do produto fornecido

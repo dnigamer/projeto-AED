@@ -34,6 +34,9 @@ add_executable(Projeto src/main.c
         src/gui/mainmenu.h
         src/operacoes.c
         src/operacoes.h
+        src/stacks.c
+        src/stacks.h
+        src/stacks.h
 )
 
 message("-- Linking Qt6")
