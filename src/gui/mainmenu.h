@@ -20,6 +20,7 @@ public slots:
 
     void onLinhasLVClicked(const QModelIndex &index);
     void onProdutosLVClicked(const QModelIndex &index);
+    void onModelosLVClicked(const QModelIndex &index);
 
     void onAtualizarStockInfoBtnClicked();
     void onNomeLojaModBtnClicked();
@@ -34,6 +35,7 @@ public:
     void setLinhas(StockLoja *ptr);
     void setProdutos(LinhaProdutos *ptr);
     void setModelos(ListaProdutos *ptr);
+    void setModeloInfo(Produto *ptr);
 
     void tabDefinicoes();
     void reloadTabs();

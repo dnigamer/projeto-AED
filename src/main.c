@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     Produto produto3 = { 0, 0, 0, "Banana", "Fruta", "Madeira", 10, 0.5, 0, NULL };
     adicionarProduto(obterLinhaProdutosPorID(&stockGeral, 2), &produto3);
 
-    Produto produto4 = { 0, 0, 0, "Pera", "Fruta", "Rocha", 10, 0.5, 0, NULL };
+    Produto produto4 = { 0, 0, 0, "Pêra", "Fruta", "Rocha", 10, 0.5, 0, NULL };
     adicionarProduto(obterLinhaProdutosPorID(&stockGeral, 2), &produto4);
 
     // chama a função para iniciar a GUI

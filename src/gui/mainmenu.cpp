@@ -96,7 +96,7 @@ MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) 
     // Listeners para ListViews
     connect(ui->linhasLV, &QListView::clicked, this, &MainMenu::onLinhasLVClicked);
     connect(ui->produtosLV, &QListView::clicked, this, &MainMenu::onProdutosLVClicked);
-    //connect(ui->modelosLV, &QListView::clicked, this, &MainMenu::onModelosLVClicked);
+    connect(ui->modelosLV, &QListView::clicked, this, &MainMenu::onModelosLVClicked);
 
     // Listeners para botoes
     // Tab Definições
@@ -157,7 +157,11 @@ void MainMenu::setLinhas(StockLoja *ptr) {
 }
 
 void MainMenu::setProdutos(LinhaProdutos *ptr) {
-    if (ptr == nullptr) return;
+    if (ptr == nullptr) {
+        ui->produtosLV->setModel(nullptr);
+        ui->modelosLV->setModel(nullptr);
+        return;
+    }
 
     auto *model = new QStringListModel(this);
     QStringList list;
@@ -183,7 +187,10 @@ void MainMenu::setProdutos(LinhaProdutos *ptr) {
 }
 
 void MainMenu::setModelos(ListaProdutos *ptr) {
-    if (ptr == nullptr) ui->modelosLV->setModel(nullptr);
+    if (ptr == nullptr) {
+        ui->modelosLV->setModel(nullptr);
+        return;
+    }
 
     auto *model = new QStringListModel(this);
     QStringList list;
@@ -200,15 +207,19 @@ void MainMenu::setModelos(ListaProdutos *ptr) {
     ui->modelosLV->setModel(model);
 
     if (list.empty()) return;
-    //if (ui->modelosLV->selectionModel() == nullptr) return;
-    //connect(ui->modelosLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onProdutosLVClicked);
+    if (ui->modelosLV->selectionModel() == nullptr) return;
+    connect(ui->modelosLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onModelosLVClicked);
+}
+
+void MainMenu::setModeloInfo(Produto *ptr) {
+    if (ptr == nullptr) return;
 }
 
 void MainMenu::tabDefinicoes() {
     ui->nomeLojaModText->setText(ui->nomeLojaLab->text());
     ui->numLinhasStockText->setText(QString::number(stock->num_linhas));
-    ui->numTiposStockText->setText(QString::number(getNumeroTipoProdutosStock(stock)));
-    ui->numProdutosStockText->setText(QString::number(getNumeroProdutosStock(stock)));
+    ui->numTiposStockText->setText(QString::number(getNumeroTipoProdutosStock(stock)));  //implementado em C
+    ui->numProdutosStockText->setText(QString::number(getNumeroProdutosStock(stock)));  //implementado em C
 }
 
 void MainMenu::reloadTabs() {
@@ -223,12 +234,25 @@ void MainMenu::onLinhasLVClicked(const QModelIndex &index) {
 }
 
 void MainMenu::onProdutosLVClicked(const QModelIndex &index) {
+    selProduto = index.row();
     QAbstractItemModel* model = ui->produtosLV->model();
     QString text = model->data(index, Qt::DisplayRole).toString();
     std::string nomeStd = text.toStdString();
     char* nome = const_cast<char*>(nomeStd.c_str());
     auto lista = (ListaProdutos *) procurarStockPorNomeProduto(stock, nome);
     setModelos(lista);
+}
+
+void MainMenu::onModelosLVClicked(const QModelIndex &index) {
+    selModelo = index.row();
+    QModelIndex indexProduto = ui->produtosLV->model()->index(selProduto, 0);
+    auto nomeInteiro = ui->produtosLV->model()->data(indexProduto, Qt::DisplayRole).toString() + " " + ui->modelosLV->model()->data(index, Qt::DisplayRole).toString();
+    ui->statusbar->showMessage("Searching for " + nomeInteiro);
+    // convert nomeInteiro to something usable by C
+    std::string nomeStd = nomeInteiro.toStdString();
+    char* nome = const_cast<char*>(nomeStd.c_str());
+    auto produto = (Produto *) obterProdutoPorNome(obterLinhaProdutosPorID(stock, selLinha), nome);
+    if (produto == nullptr) ui->statusbar->showMessage("Produto não encontrado");
 }
 
 void MainMenu::onNomeLojaModBtnClicked() {
@@ -251,16 +275,41 @@ void MainMenu::onAtualizarStockInfoBtnClicked() {
 }
 
 void MainMenu::onApagaLinhasStockBtnClicked() {
-    ui->statusbar->showMessage("Ação apagar linhas de stock");
-
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setText("Tem a certeza que deseja apagar todas as linhas de stock?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::No) return;
+    apagarLinhasProdutos(stock);
+    ui->statusbar->showMessage("Linhas de stock apagadas. Stock foi limpo.");
 }
 
 void MainMenu::onApagaProdutosStockBtnClicked() {
-    ui->statusbar->showMessage("Ação apagar produtos de stock");
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setText("Tem a certeza que deseja apagar todos os produtos do stock?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::No) return;
+    apagarProdutosLinhasStock(stock);
+    ui->statusbar->showMessage("Produtos de stock apagados. Linhas foram mantidas.");
 }
 
 void MainMenu::onTabChanged(int index) {
-    if (index == 2) { // definições
+    if (index == 0) { // stock
+        setLinhas(stock);
+        setProdutos(nullptr);
+        setModelos(nullptr);
+    } else if (index == 1) { // pesquisa
+        ui->procuraTE->clear();
+        ui->catPesqDD->clear();
+        ui->resultPesqTV->clear();
+    } else if (index == 2) { // definições
         tabDefinicoes();
     }
 }

@@ -245,7 +245,7 @@
         <string>Quantidade</string>
        </property>
       </widget>
-      <widget class="QGroupBox" name="outrosparamGB">
+      <widget class="QGroupBox" name="outrosParamGB">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -257,7 +257,7 @@
        <property name="title">
         <string>Outros parâmetros</string>
        </property>
-       <widget class="QTableWidget" name="tableWidget_2">
+       <widget class="QTableWidget" name="outrosParamTV">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -439,7 +439,7 @@
          <x>10</x>
          <y>30</y>
          <width>130</width>
-         <height>501</height>
+         <height>500</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -455,7 +455,7 @@
      <attribute name="title">
       <string>Pesquisa</string>
      </attribute>
-     <widget class="QLineEdit" name="produtoTE_2">
+     <widget class="QLineEdit" name="procuraTE">
       <property name="geometry">
        <rect>
         <x>140</x>
@@ -468,7 +468,7 @@
        <string>Valor</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="procuraBtn_2">
+     <widget class="QPushButton" name="procuraBtn">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -550,7 +550,7 @@
         <string>Ordenar</string>
        </property>
       </widget>
-      <widget class="QTableWidget" name="tableWidget">
+      <widget class="QTableWidget" name="resultPesqTV">
        <property name="geometry">
         <rect>
          <x>10</x>

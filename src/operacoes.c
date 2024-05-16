@@ -26,6 +26,31 @@ int editarStockLoja(StockLoja* stockLoja, const char* nome) {
     return 0;
 }
 
+void apagarLinhasProdutos(StockLoja* stockLoja) {
+    ListaLinhaProdutos* current = stockLoja->lista_linhas;
+    while (current != NULL) {
+        ListaLinhaProdutos* next = (ListaLinhaProdutos *) current->prox_linha;
+        free(current);
+        current = next;
+    }
+    stockLoja->lista_linhas = NULL;
+    stockLoja->num_linhas = 0;
+}
+
+void apagarProdutosLinhasStock(StockLoja* stockLoja) {
+    ListaLinhaProdutos* current = stockLoja->lista_linhas;
+    while (current != NULL) {
+        ListaProdutos* currentProd = current->linha->lista_produtos;
+        while (currentProd != NULL) {
+            ListaProdutos* next = (ListaProdutos *) currentProd->prox_produto;
+            free(currentProd);
+            currentProd = next;
+        }
+        current->linha->lista_produtos = NULL;
+        current->linha->num_produtos = 0;
+        current = (ListaLinhaProdutos *) current->prox_linha;
+    }
+}
 
 // Cria uma nova instância para a linha de produtos
 // Retorna a linha de produtos
