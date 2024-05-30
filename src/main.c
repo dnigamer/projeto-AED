@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
     // Define uma instância de stock
     StockLoja stockGeral = { "Mercado do bolhão", 0, NULL};
 
-    // TEMPORARIO
     // cria uma linha de produtos e adiciona ao stock
     LinhaProdutos linhatemp;
 

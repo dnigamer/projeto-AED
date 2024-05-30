@@ -26,7 +26,7 @@ typedef struct {
     unsigned int linhaID;
     unsigned int listaID;
     unsigned int produtoID;
-    char nome[MAX_CHAR]; // nome inteiro do produto (item + modelo + outros)
+    char nome[MAX_CHAR];
     char item[MAX_CHAR];
     char modelo[MAX_CHAR];
     unsigned int quantidade;
