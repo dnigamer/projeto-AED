@@ -484,7 +484,7 @@
      <widget class="QComboBox" name="catPesqDD">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>5</x>
         <y>10</y>
         <width>130</width>
         <height>30</height>

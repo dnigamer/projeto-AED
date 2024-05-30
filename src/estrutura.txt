@@ -1,15 +1,16 @@
 - Itens (Ex: Camisas, calças, sapatos)
  - Modelos (Ex: Camisa Polo, Camisa Social, Calças Jeans, Calças Social, Sapato Social, Sapato Casual)
-  - Código          (Ex: 001) - unsigned int
-   - Código interno para identificação do produto em estilo <item><modelo><submodelo>
+  - Código          (Ex: 001)
+   - Código interno para identificação do produto em estilo <linha><lista><produto> (nas structs estão separados em 3)
+    - linhaID - ID da linha de produtos
+    - listaID - ID da lista (a ser removido (n sei para que serve ?) )
+    - produtoID - ID do produto dentro da linha de produtos
   - Nome            (Ex: Camisa Polo) - string
    - Nome do produto
-  - Marca           (Ex: Adidas) - string
-   - Marca do produto
   - Item            (Ex: Camisa) - string
    - Item do produto
-  - Sub-item        (Ex: Polo) - string
-   - Sub-item do produto
+  - Modelo        (Ex: Polo) - string
+   - Modelo do produto
   - Preço           (Ex: 100.00) - float
   - Quantidade      (Ex: 10) - unsigned int
    - Definição de quantidade em estoque
@@ -18,91 +19,99 @@
     - Criar um array com os parâmetros adicionais do produto ou struct com os parâmetros adicionais do produto
 
 - Stock
+    - Nome da loja
     - Lista de linhas
-        - Linha de produtos
-            ------------------------
-            - Código
-            - Lista de produtos
-                ------------------------
-                - Produto (codigo, infos.)
-                    - Lista de parâmetros
-                        - Parametro
-                        - Parãmetro
-                ------------------------
-                    ------------------------
-                    - Produto (codigo, infos.)
-                        - Lista de parâmetros
-                            - Parametro
-                            - Parãmetro
-                    ------------------------
-                        ------------------------
-                        - Produto (codigo, infos.)
-                            - Lista de parâmetros
-                                - Parametro
-                                - Parãmetro
-                        ------------------------
-                            ------------------------
-                            - Produto (codigo, infos.)
-                                - Lista de parâmetros
-                                    - Parametro
-                                    - Parãmetro
-                            ------------------------
-            ------------------------
-                ------------------------
-                - Linha de produtos
-                    - Código
-                    - Lista de produtos
-                        ------------------------
-                        - Produto (codigo, infos.)
-                            - Lista de parâmetros
-                                - Parametro
-                                - Parãmetro
-                        ------------------------
-                            ------------------------
-                            - Produto (codigo, infos.)
-                                - Lista de parâmetros
-                                    - Parametro
-                                    - Parãmetro
-                            ------------------------
-                                ------------------------
-                                - Produto (codigo, infos.)
-                                    - Lista de parâmetros
-                                        - Parametro
-                                        - Parãmetro
-                                ------------------------
-                                    ------------------------
-                                    - Produto (codigo, infos.)
-                                        - Lista de parâmetros
-                                            - Parametro
-                                            - Parãmetro
-                                    ------------------------
-                ------------------------
-                    ------------------------
-                    - Linha de produtos
-                        - Código
-                        - Lista de produtos
-                            ------------------------
-                            - Produto (codigo, infos.)
-                                - Lista de parâmetros
-                                    - Parametro
-                                    - Parãmetro
-                            ------------------------
-                                ------------------------
-                                - Produto (codigo, infos.)
-                                    - Lista de parâmetros
-                                        - Parametro
-                                        - Parãmetro
-                                ------------------------
-                                    ------------------------
-                                    - Produto (codigo, infos.)
-                                        - Lista de parâmetros
-                                            - Parametro
-                                            - Parãmetro
-                                    ------------------------
-                                        ------------------------
-                                        - Produto (codigo, infos.)
-                                            - Lista de parâmetros
-                                                - Parametro
-                                                - Parãmetro
-                                        ------------------------
-                    ------------------------
+         | -> ------------------------
+         |  - Linha de produtos
+         |      - Código
+         |      - Nome da linha
+         |      - Número de produtos
+         |      - Lista de produtos
+         |           |   ------------------------
+         |           |   | - Produto (codigo, infos.)
+         |           | -|  - Lista de parâmetros
+         |               |      - Parametro
+         |               |      - Parametro
+         |              ------------------------
+         |               |   ------------------------
+         |               |   | - Produto (codigo, infos.)
+         |               | -|  - Lista de parâmetros
+         |                   |      - Parametro
+         |                   |      - Parametro
+         |                  ------------------------
+         |                   |   ------------------------
+         |                   |   | - Produto (codigo, infos.)
+         |                   | -|  - Lista de parâmetros
+         |                       |      - Parametro
+         |                       |      - Parametro
+         |                      ------------------------
+         |                       |   ------------------------
+         |                       |   | - Produto (codigo, infos.)
+         |                       | -|  - Lista de parâmetros
+         |                           |      - Parametro
+         |                           |      - Parametro
+         |                          ------------------------
+         | ------------------------
+             | -> ------------------------
+             |  - Linha de produtos
+             |      - Código
+             |      - Nome da linha
+             |      - Número de produtos
+             |      - Lista de produtos
+             |           |   ------------------------
+             |           |   | - Produto (codigo, infos.)
+             |           | -|  - Lista de parâmetros
+             |               |      - Parametro
+             |               |      - Parametro
+             |              ------------------------
+             |               |   ------------------------
+             |               |   | - Produto (codigo, infos.)
+             |               | -|  - Lista de parâmetros
+             |                   |      - Parametro
+             |                   |      - Parametro
+             |                  ------------------------
+             |                   |   ------------------------
+             |                   |   | - Produto (codigo, infos.)
+             |                   | -|  - Lista de parâmetros
+             |                       |      - Parametro
+             |                       |      - Parametro
+             |                      ------------------------
+             |                       |   ------------------------
+             |                       |   | - Produto (codigo, infos.)
+             |                       | -|  - Lista de parâmetros
+             |                           |      - Parametro
+             |                           |      - Parametro
+             |                          ------------------------
+             | ------------------------
+                | -> ------------------------
+                |  - Linha de produtos
+                |      - Código
+                |      - Nome da linha
+                |      - Número de produtos
+                |      - Lista de produtos
+                |           |   ------------------------
+                |           |   | - Produto (codigo, infos.)
+                |           | -|  - Lista de parâmetros
+                |               |      - Parametro
+                |               |      - Parametro
+                |              ------------------------
+                |               |   ------------------------
+                |               |   | - Produto (codigo, infos.)
+                |               | -|  - Lista de parâmetros
+                |                   |      - Parametro
+                |                   |      - Parametro
+                |                  ------------------------
+                |                   |   ------------------------
+                |                   |   | - Produto (codigo, infos.)
+                |                   | -|  - Lista de parâmetros
+                |                       |      - Parametro
+                |                       |      - Parametro
+                |                      ------------------------
+                |                       |   ------------------------
+                |                       |   | - Produto (codigo, infos.)
+                |                       | -|  - Lista de parâmetros
+                |                           |      - Parametro
+                |                           |      - Parametro
+                |                          ------------------------
+                | ------------------------
+        ------------------------
