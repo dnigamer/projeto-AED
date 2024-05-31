@@ -6,16 +6,20 @@
 void startGui(int argc, char **argv, StockLoja *stockGeral) {
     QApplication app(argc, argv);
     MainMenu mainMenu;
+
+    // define o nome da janela
     mainMenu.setWindowTitle("Gestão de Stock - " + QString(stockGeral->nome));
+
+    // apresenta as linhas de produtos
     mainMenu.setLinhas(stockGeral);
+
+    // apresenta o stock
     mainMenu.setStock(stockGeral);
+
+    // atualiza as tabs
     mainMenu.reloadTabs();
 
-    //QFile file("MacOS.qss");
-    //file.open(QFile::ReadOnly);
-    //QString style( file.readAll() );
-    //app.setStyleSheet( style );
-
+    // mostra a janela
     mainMenu.show();
     QApplication::exec();
 }

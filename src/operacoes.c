@@ -18,7 +18,7 @@ StockLoja criarStockLoja(char* nome) {
 
 // Adiciona a funcionalidade de editar o nome da loja partindo do pointer e de uma string com o novo nome
 int editarStockLoja(StockLoja* stockLoja, const char* nome) {
-    char *nomeStock = (char *) malloc(20);  // resolve problema com ponteiro constante
+    char *nomeStock = (char *) malloc(20);
     if (nomeStock == NULL) return 1;
     strncpy(nomeStock, nome, 20);
     strncpy(stockLoja->nome, nomeStock, 20);
@@ -216,7 +216,7 @@ ListaProdutos* procurarStockPorNomeProduto(StockLoja* stock, char* nomeItem) {
 
 // Cria um novo produto usando os parâmetros fornecidos
 // Retorna instância de produto
-Produto criarProduto(char* nome, char* item, char* modelo, unsigned int quantidade, double preco, ListaParamAdicionaisProduto* parametros) {
+Produto criarProduto(char* nome, char* item, char* modelo, unsigned int quantidade, double preco, ListaParamAdicionalProduto* parametros) {
     Produto p;
     p.listaID = 0;
     p.linhaID = 0;
@@ -226,6 +226,7 @@ Produto criarProduto(char* nome, char* item, char* modelo, unsigned int quantida
     strncpy(p.modelo, modelo, 50);
     p.quantidade = quantidade;
     p.preco = preco;
+    p.num_parametros = getNumeroParametrosAdicionais(parametros);
     p.parametros = parametros;
     return p; // { 0, 0, 0, nome, item, modelo, quantidade, preco, parametros };
 }
@@ -243,10 +244,10 @@ Produto* obterProdutoPorID(LinhaProdutos* linha, unsigned int IDProduto) {
 }
 
 // Retorna um pointer de produto de uma linha de produtos com base no nome do produto
-Produto* obterProdutoPorNome(LinhaProdutos* linha, char* nome) {
+Produto* obterProdutoPorNome(LinhaProdutos* linha, char* nome, char* modelo) {
     ListaProdutos* current = linha->lista_produtos;
     while (current != NULL) {
-        if (strcmp(current->produto->nome, nome) == 0) {
+        if (strcmp(current->produto->nome, nome) == 0 && strcmp(current->produto->modelo, modelo) == 0) {
             return current->produto;
         }
         current = (ListaProdutos *) current->prox_produto;
@@ -262,10 +263,18 @@ int adicionarProduto(LinhaProdutos* linha, Produto* produto) {
     ListaProdutos* novo_no = (ListaProdutos*) malloc(sizeof(ListaProdutos));
     if (novo_no == NULL) return 1;
 
-    produto->produtoID = linha->num_produtos + 1;
-    produto->linhaID = linha->linhaID;
+    Produto* novo_produto = (Produto*) malloc(sizeof(Produto));
+    if (novo_produto == NULL) {
+        free(novo_no);
+        return 1;
+    }
 
-    novo_no->produto = produto;
+    *novo_produto = *produto;
+    novo_produto->produtoID = linha->num_produtos + 1;
+    novo_produto->linhaID = linha->linhaID;
+    novo_produto->num_parametros = getNumeroParametrosAdicionais(produto->parametros);
+
+    novo_no->produto = novo_produto;
     novo_no->prox_produto = NULL;
     if (linha->lista_produtos != NULL) {
         novo_no->prox_produto = (struct ListaProdutos *) linha->lista_produtos;
@@ -277,27 +286,149 @@ int adicionarProduto(LinhaProdutos* linha, Produto* produto) {
 
     return 0;
 }
-
 // Remove um produto de uma linha de produtos
 // Usar metodos de pop para remover
-int removerProduto(LinhaProdutos* linha, int IDproduto) {
+int removerProduto(LinhaProdutos* linha, unsigned int IDproduto) {
     ListaProdutos* temp = linha->lista_produtos;
-    // implement using stack pop
-    if (temp != NULL && temp->produto->produtoID == IDproduto) {
-        linha->lista_produtos = (ListaProdutos *) temp->prox_produto;
-        free(temp);
-        return 0;
+    ListaProdutos* prev = NULL;
+
+    while (temp != NULL && temp->produto->produtoID != IDproduto) {
+        prev = temp;
+        temp = temp->prox_produto;
     }
-    return 0;
+    if (temp == NULL) return 0;
+
+    if (prev == NULL) {
+        linha->lista_produtos = temp->prox_produto;
+    } else {
+        prev->prox_produto = temp->prox_produto;
+    }
+
+    free(temp);
+    return 1;
 }
 
 // Atualiza um produto numa linha de produtos com base no ID do produto fornecido
 int atualizarProduto(LinhaProdutos* linha, Produto* produto) {
-    Produto* prod_anterior = (Produto *) obterProdutoPorID(linha, produto->produtoID);
-    if (prod_anterior == NULL) return 1;
-    *prod_anterior = *produto;
+    ListaProdutos* current = linha->lista_produtos;
+    while (current != NULL) {
+        if (current->produto->produtoID == produto->produtoID) {
+            strncpy(current->produto->nome, produto->nome, sizeof(current->produto->nome));
+            strncpy(current->produto->item, produto->item, sizeof(current->produto->item));
+            strncpy(current->produto->modelo, produto->modelo, sizeof(current->produto->modelo));
+            current->produto->quantidade = produto->quantidade;
+            current->produto->preco = produto->preco;
+
+            ListaParamAdicionalProduto* current_param = current->produto->parametros;
+            while (current_param != NULL) {
+                ListaParamAdicionalProduto* next = current_param->prox_parametro;
+                free(current_param);
+                current_param = next;
+            }
+            current->produto->parametros = produto->parametros;
+
+            return 0;
+        }
+        current = current->prox_produto;
+    }
+    return 1;
+}
+
+
+// Cria uma nova instância de lista de parâmetros adicionais de produtos
+// Retorna a lista de parâmetros adicionais de produtos
+ListaParamAdicionalProduto* criarListaParamAdicionaisProduto() {
+    return NULL;
+}
+
+ParamAdicionalProduto* criarParametroAdicionalProduto(char* nome, char* valor) {
+    ParamAdicionalProduto* parametro = (ParamAdicionalProduto*) malloc(sizeof(ParamAdicionalProduto));
+    if (parametro == NULL) return NULL;
+    parametro->id = 0;
+    strncpy(parametro->nome, nome, MAX_CHAR);
+    strncpy(parametro->valor, valor, MAX_CHAR);
+    return parametro;
+}
+
+// Adiciona um parâmetro adicional a uma lista de parâmetros adicionais de produtos
+// Utiliza a lista de parâmetros adicionais de produtos como pointer e o parâmetro a adicionar como pointer
+// Usa o método de push para adicionar um parâmetro a lista de parâmetros adicionais de produtos
+int adicionarParametroAdicionalProduto(ListaParamAdicionalProduto** lista, ParamAdicionalProduto* parametro) {
+    ListaParamAdicionalProduto* novo_no = (ListaParamAdicionalProduto*) malloc(sizeof(ListaParamAdicionalProduto));
+    if (novo_no == NULL) return 1;
+
+    novo_no->parametro = parametro;
+    novo_no->prox_parametro = *lista;
+    *lista = novo_no;
     return 0;
 }
+
+// Remove um parâmetro adicional de uma lista de parâmetros adicionais de produtos
+// Utiliza a lista de parâmetros adicionais de produtos como pointer e o código do parâmetro a remover
+int removerParametroAdicionalProduto(ListaParamAdicionalProduto** lista, unsigned int codigoParametro) {
+    ListaParamAdicionalProduto* temp = *lista;
+    ListaParamAdicionalProduto* prev = NULL;
+
+    if (temp != NULL && temp->parametro->id == codigoParametro) {
+        *lista = temp->prox_parametro;
+        free(temp);
+        return 0;
+    }
+
+    while (temp != NULL && temp->parametro->id != codigoParametro) {
+        prev = temp;
+        temp = temp->prox_parametro;
+    }
+
+    if (temp == NULL) return 1;
+    if (prev != NULL) {
+        prev->prox_parametro = temp->prox_parametro;
+    } else {
+        *lista = temp->prox_parametro;
+    }
+    free(temp);
+    return 0;
+}
+
+ParamAdicionalProduto* obterParametroAdicionalPorID(ListaParamAdicionalProduto* lista, unsigned int codigoParametro) {
+    ListaParamAdicionalProduto* current = lista;
+    while (current != NULL) {
+        if (current->parametro->id == codigoParametro) {
+            return current->parametro;
+        }
+        current = current->prox_parametro;
+    }
+    return NULL;
+}
+
+ParamAdicionalProduto* obterParametroAdicionalPorNome(ListaParamAdicionalProduto* lista, char* nomeParametro) {
+    ListaParamAdicionalProduto* current = lista;
+    while (current != NULL) {
+        if (strcmp(current->parametro->nome, nomeParametro) == 0) {
+            return current->parametro;
+        }
+        current = current->prox_parametro;
+    }
+    return NULL;
+}
+
+int atualizarParametroAdicional(ListaParamAdicionalProduto* lista, ParamAdicionalProduto* parametro) {
+    ParamAdicionalProduto* param_anterior = (ParamAdicionalProduto *) obterParametroAdicionalPorID(lista, parametro->id);
+    if (param_anterior == NULL) return 1;
+    *param_anterior = *parametro;
+    return 0;
+}
+
+unsigned int getNumeroParametrosAdicionais(ListaParamAdicionalProduto* lista) {
+    unsigned int count = 0;
+    ListaParamAdicionalProduto* current = lista;
+    while (current != NULL) {
+        count++;
+        current = current->prox_parametro;
+    }
+    return count;
+}
+
 
 unsigned int getNumeroLinhasStock(StockLoja* stock) {
     return stock->num_linhas;

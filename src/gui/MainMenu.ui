@@ -114,7 +114,7 @@
       <property name="title">
        <string>Informações do produto</string>
       </property>
-      <widget class="QLabel" name="codigoLab">
+      <widget class="QLabel" name="codigoModeloLab">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -127,7 +127,7 @@
         <string>Código interno</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="codigoText">
+      <widget class="QLineEdit" name="codigoModeloText">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -146,7 +146,7 @@
         <string notr="true"/>
        </property>
       </widget>
-      <widget class="QLineEdit" name="nomeText">
+      <widget class="QLineEdit" name="nomeModeloText">
        <property name="geometry">
         <rect>
          <x>280</x>
@@ -165,7 +165,7 @@
         <string notr="true"/>
        </property>
       </widget>
-      <widget class="QLabel" name="nomeLab">
+      <widget class="QLabel" name="nomeModeloLab">
        <property name="geometry">
         <rect>
          <x>280</x>
@@ -178,7 +178,7 @@
         <string>Nome</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="precoText">
+      <widget class="QLineEdit" name="precoModeloText">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -200,7 +200,7 @@
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="precoLab">
+      <widget class="QLabel" name="precoModeloLab">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -213,7 +213,7 @@
         <string>Preço</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="quantText">
+      <widget class="QLineEdit" name="quantModeloText">
        <property name="geometry">
         <rect>
          <x>280</x>
@@ -232,7 +232,7 @@
         <string notr="true"/>
        </property>
       </widget>
-      <widget class="QLabel" name="quantLab">
+      <widget class="QLabel" name="quantModeloLab">
        <property name="geometry">
         <rect>
          <x>280</x>

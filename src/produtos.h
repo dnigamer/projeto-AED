@@ -10,15 +10,16 @@ extern "C" {
 
 // definição de struct de parâmetros adicionais para um produto
 typedef struct {
+    unsigned int id;
     char nome[MAX_CHAR];
     char valor[MAX_CHAR];
-} ParamAdicionaisProduto;
+} ParamAdicionalProduto;
 
 // definição de struct de lista de parâmetros adicionais para um produto
-typedef struct ListaParamAdicionaisProduto {
-    ParamAdicionaisProduto* parametro;
-    struct ListaParamAdicionaisProduto* prox_parametro;
-} ListaParamAdicionaisProduto;
+typedef struct ListaParamAdicionalProduto {
+    ParamAdicionalProduto* parametro;
+    struct ListaParamAdicionalProduto* prox_parametro;
+} ListaParamAdicionalProduto;
 
 
 // definição de struct de produto
@@ -32,7 +33,7 @@ typedef struct {
     unsigned int quantidade;
     double preco;
     unsigned int num_parametros;
-    ListaParamAdicionaisProduto* parametros;
+    ListaParamAdicionalProduto* parametros;
 } Produto;
 
 // definição de struct de lista de produtos para uma linha de produtos
