@@ -100,7 +100,9 @@ MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) 
 
     // Listeners para botoes
     // Tab Stock
-    //connect(ui->stockAtualizarBtn, &QPushButton::clicked, this, &MainMenu::setLinhas)
+    connect(ui->adMarcaBtn, &QPushButton::clicked, this, &MainMenu::onAdicionarLinhaBtnClicked);
+    connect(ui->delMarcaBtn, &QPushButton::clicked, this, &MainMenu::onRemoverLinhaBtnClicked);
+    connect(ui->edMarcaBtn, &QPushButton::clicked, this, &MainMenu::onAtualizarLinhaBtnClicked);
     connect(ui->adModeloBtn, &QPushButton::clicked, this, &MainMenu::onAdicionarProdutoBtnClicked);
     connect(ui->delModeloBtn, &QPushButton::clicked, this, &MainMenu::onRemoverProdutoBtnClicked);
     connect(ui->edModeloBtn, &QPushButton::clicked, this, &MainMenu::onAtualizarProdutoBtnClicked);
@@ -239,9 +241,10 @@ void MainMenu::setModeloInfo(Produto *ptr) {
         ui->nomeModeloText->clear();
         ui->quantModeloText->clear();
         ui->precoModeloText->clear();
-        auto *model = new QStandardItemModel(0, 2, this);
-        model->setHorizontalHeaderItem(0, new QStandardItem("Nome"));
-        model->setHorizontalHeaderItem(1, new QStandardItem("Valor"));
+        ui->outrosParamTV->clearContents();
+        ui->outrosParamTV->setRowCount(0);
+        ui->outrosParamTV->setColumnCount(2);
+        ui->outrosParamTV->setHorizontalHeaderLabels(QStringList() << "Nome" << "Valor");
         return;
     }
 
@@ -251,17 +254,20 @@ void MainMenu::setModeloInfo(Produto *ptr) {
     ui->quantModeloText->setText(QString::number(ptr->quantidade));
     ui->precoModeloText->setText(QString::number(ptr->preco).replace('.',',') + " €");
 
-    auto *model = new QStandardItemModel(static_cast<int>(ptr->num_parametros), 2, this);
-    model->setHorizontalHeaderItem(0, new QStandardItem("Nome"));
-    model->setHorizontalHeaderItem(1, new QStandardItem("Valor"));
+    // Clear any existing items and set the row count
+    ui->outrosParamTV->clearContents();
+    ui->outrosParamTV->setRowCount(static_cast<int>(ptr->num_parametros));
+    ui->outrosParamTV->setColumnCount(2);
+    ui->outrosParamTV->setHorizontalHeaderLabels(QStringList() << "Nome" << "Valor");
+
     ListaParamAdicionalProduto* current = ptr->parametros;
-    int i = 0;
-    while (current != nullptr) {
+    int numparametros = static_cast<int>(ptr->num_parametros);
+
+    for (int i = 0; i < numparametros; i++) {
         ParamAdicionalProduto param = *current->parametro;
-        model->setItem(i, 0, new QStandardItem(param.nome));
-        model->setItem(i, 1, new QStandardItem(param.valor));
+        ui->outrosParamTV->setItem(i, 0, new QTableWidgetItem(QString::fromStdString(param.nome)));
+        ui->outrosParamTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(param.valor)));
         current = current->prox_parametro;
-        i++;
     }
 }
 
@@ -273,7 +279,7 @@ void MainMenu::tabDefinicoes() {
     ui->numProdutosStockText->setText(QString::number(getNumeroProdutosStock(stock)));  //implementado em C
 }
 
-// Função para recarregar as tabs (dados estáticos) (a implementar para o resto)
+// Função para recarregar as tabs (dados estáticos) - para quando se muda de tab
 void MainMenu::reloadTabs() {
     if (ui->tabWidget->currentIndex() == 0) { // stock
         setLinhas(stock);
@@ -287,7 +293,7 @@ void MainMenu::reloadTabs() {
     }
 }
 
-// Função para mostrar os produtos na ListView baseado na linha de produtos selecionada na primeira ListView
+// Função para mostrar os produtos na segunda ListView baseado na linha de produtos selecionada na primeira ListView
 void MainMenu::onLinhasLVClicked(const QModelIndex &index) {
     selLinha = index.row();
     auto linha = (LinhaProdutos *) obterLinhaProdutosPorID(stock, selLinha + 1);
@@ -296,7 +302,7 @@ void MainMenu::onLinhasLVClicked(const QModelIndex &index) {
     setModeloInfo(nullptr);
 }
 
-// Função para mostrar os modelos na ListView baseado no produto selecionado na segunda ListView
+// Função para mostrar os modelos na terceira ListView baseado no produto selecionado na segunda ListView
 void MainMenu::onProdutosLVClicked(const QModelIndex &index) {
     selProduto = index.row();
     QAbstractItemModel* model = ui->produtosLV->model();
@@ -328,6 +334,105 @@ void MainMenu::onModelosLVClicked(const QModelIndex &index) {
     setModeloInfo(produto);
 
     if (produto == nullptr) ui->statusbar->showMessage("ERRO!! - Produto não encontrado!");
+}
+
+void MainMenu::onAdicionarLinhaBtnClicked() {
+    LinhaDialog dialog;
+    dialog.setNomeJanela(0,"");
+    dialog.show();
+    dialog.exec();
+
+    if (dialog.result() == QDialog::Accepted) {
+        std::string nome = dialog.getNome().toStdString();
+        char* nomeChar = new char[nome.length() + 1];
+        std::strcpy(nomeChar, nome.c_str());
+
+        LinhaProdutos linha = criarLinhaProdutos(nomeChar);
+        adicionarLinhaProdutos(stock, linha);
+        delete[] nomeChar;
+
+        setLinhas(stock);
+        setProdutos(nullptr);
+        setModelos(nullptr);
+        setModeloInfo(nullptr);
+        ui->statusbar->showMessage("Linha de produtos adicionada com sucesso!");
+    }
+}
+
+// Função para remover uma linha de produtos
+void MainMenu::onRemoverLinhaBtnClicked() {
+    if (ui->linhasLV->currentIndex().row() == -1) {
+        ui->statusbar->showMessage("ERRO!! - Selecione uma linha de produtos para remover.");
+        return;
+    }
+
+    auto nomeLinha = ui->linhasLV->model()->data(ui->linhasLV->currentIndex(), Qt::DisplayRole).toString();
+    std::string nomeStd = nomeLinha.toStdString();
+    char* nome = const_cast<char*>(nomeStd.c_str());
+
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setText("Tem a certeza que deseja remover a linha de produtos \"" + nomeLinha + "\"?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::No) return;
+
+    LinhaProdutos *linha = obterLinhaProdutosPorNome(stock, nome);
+    int resultado = removerLinhaProdutos(stock, linha->linhaID);
+    if (resultado == 1) {
+        ui->statusbar->showMessage("FATAL!! - Linha de produtos não encontrada!");
+        return;
+    }
+
+    setLinhas(stock);
+    setProdutos(nullptr);
+    setModelos(nullptr);
+    setModeloInfo(nullptr);
+    ui->statusbar->showMessage("Linha de produtos removida com sucesso!");
+}
+
+// Função para atualizar uma linha de produtos
+void MainMenu::onAtualizarLinhaBtnClicked() {
+    if (ui->linhasLV->currentIndex().row() == -1) {
+        ui->statusbar->showMessage("ERRO!! - Selecione uma linha de produtos para atualizar.");
+        return;
+    }
+
+    auto nomeLinha = ui->linhasLV->model()->data(ui->linhasLV->currentIndex(), Qt::DisplayRole).toString();
+    std::string nomeStd = nomeLinha.toStdString();
+    char* nome = const_cast<char*>(nomeStd.c_str());
+
+    LinhaProdutos *linha = obterLinhaProdutosPorNome(stock, nome);
+    LinhaDialog dialog;
+    dialog.setNomeJanela(1, nomeLinha);
+    dialog.setID(QString::number(linha->linhaID));
+    dialog.setNome(nomeLinha);
+    dialog.show();
+    dialog.exec();
+
+    if (dialog.result() == QDialog::Accepted) {
+        std::string novoNome = dialog.getNome().toStdString();
+        char* novoNomeChar = new char[novoNome.length() + 1];
+        std::strcpy(novoNomeChar, novoNome.c_str());
+
+        LinhaProdutos novaLinha = criarLinhaProdutos(novoNomeChar);
+        novaLinha.linhaID = linha->linhaID;
+
+        int resultado = atualizarLinhaProdutos(stock, &novaLinha);
+        if (resultado == 1) {
+            ui->statusbar->showMessage("FATAL!! - Linha de produtos não encontrada!");
+            return;
+        }
+
+        setLinhas(stock);
+        setProdutos(nullptr);
+        setModelos(nullptr);
+        setModeloInfo(nullptr);
+        ui->statusbar->showMessage("Linha de produtos atualizada com sucesso!");
+    }
+
 }
 
 // Função para adicionar um produto a uma linha de produtos
@@ -365,7 +470,7 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
             std::strcpy(valorParamChar, valorParam.c_str());
 
             ParamAdicionalProduto* parametro = criarParametroAdicionalProduto(nomeParamChar, valorParamChar);
-            adicionarParametroAdicionalProduto(&parametros, parametro);
+            adicionarParametroAdicionalLista(&parametros, parametro);
 
             delete[] nomeParamChar;
             delete[] valorParamChar;
@@ -505,7 +610,7 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
             std::strcpy(valorParamChar, valorParam.c_str());
 
             ParamAdicionalProduto* parametro = criarParametroAdicionalProduto(nomeParamChar, valorParamChar);
-            adicionarParametroAdicionalProduto(&parametros, parametro);
+            adicionarParametroAdicionalLista(&parametros, parametro);
 
             delete[] nomeParamChar;
             delete[] valorParamChar;
@@ -540,7 +645,7 @@ void MainMenu::onNomeLojaModBtnClicked() {
     QString newName = ui->nomeLojaModText->text();
     if (newName.isEmpty()) return;
     int resultado = editarStockLoja(stock, newName.toStdString().c_str());
-    if (resultado == 0) {
+    if (resultado == 1) {
         ui->statusbar->showMessage("ERRO!! - Erro ao alterar o nome da loja");
         return;
     }
@@ -566,6 +671,7 @@ void MainMenu::onApagaLinhasStockBtnClicked() {
     int ret = msgBox.exec();
     if (ret == QMessageBox::No) return;
     apagarLinhasProdutos(stock);
+    tabDefinicoes();
     ui->statusbar->showMessage("Linhas de stock apagadas. Stock foi limpo.");
 }
 
@@ -580,6 +686,7 @@ void MainMenu::onApagaProdutosStockBtnClicked() {
     int ret = msgBox.exec();
     if (ret == QMessageBox::No) return;
     apagarProdutosLinhasStock(stock);
+    tabDefinicoes();
     ui->statusbar->showMessage("Produtos de stock apagados. Linhas foram mantidas.");
 }
 
@@ -589,6 +696,7 @@ void MainMenu::onTabChanged(int index) {
         setLinhas(stock);
         setProdutos(nullptr);
         setModelos(nullptr);
+        setModeloInfo(nullptr);
     } else if (index == 1) { // pesquisa
         ui->procuraTE->clear();
         ui->resultPesqTV->clear();

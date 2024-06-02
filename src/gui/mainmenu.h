@@ -10,6 +10,7 @@
 #include <QStandardItemModel>
 #include "../operacoes.h"
 #include "MenuDialog.h"
+#include "LinhaDialog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainMenu; }
@@ -24,11 +25,11 @@ public slots:
     void onProdutosLVClicked(const QModelIndex &index);
     void onModelosLVClicked(const QModelIndex &index);
 
-    //void onAdicionarLinhaBtnClicked();
+    void onAdicionarLinhaBtnClicked();
     void onAdicionarProdutoBtnClicked();
-    //void onRemoverLinhaBtnClicked();
+    void onRemoverLinhaBtnClicked();
     void onRemoverProdutoBtnClicked();
-    //void onAtualizarLinhaBtnClicked();
+    void onAtualizarLinhaBtnClicked();
     void onAtualizarProdutoBtnClicked();
 
     void onAtualizarStockInfoBtnClicked();

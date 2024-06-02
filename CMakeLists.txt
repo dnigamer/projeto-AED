@@ -36,6 +36,9 @@ add_executable(Projeto src/main.c
         src/operacoes.h
         src/gui/MenuDialog.cpp
         src/gui/MenuDialog.h
+        src/gui/LinhaDialog.cpp
+        src/gui/LinhaDialog.h
+        src/gui/LinhaDialog.ui
 )
 
 message("-- Linking Qt6")

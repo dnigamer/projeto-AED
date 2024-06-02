@@ -297,22 +297,6 @@
       <string>-</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="ediParam">
-     <property name="geometry">
-      <rect>
-       <x>110</x>
-       <y>245</y>
-       <width>40</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset theme="mail-message-new"/>
-     </property>
-    </widget>
    </widget>
   </widget>
   <widget class="QLabel" name="dialogTitle">

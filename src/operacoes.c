@@ -18,11 +18,7 @@ StockLoja criarStockLoja(char* nome) {
 
 // Adiciona a funcionalidade de editar o nome da loja partindo do pointer e de uma string com o novo nome
 int editarStockLoja(StockLoja* stockLoja, const char* nome) {
-    char *nomeStock = (char *) malloc(20);
-    if (nomeStock == NULL) return 1;
-    strncpy(nomeStock, nome, 20);
-    strncpy(stockLoja->nome, nomeStock, 20);
-    free(nomeStock);
+    strncpy(stockLoja->nome, nome, 20);
     return 0;
 }
 
@@ -111,29 +107,23 @@ int removerLinhaProdutos(StockLoja* stockLoja, unsigned int codigoLinha) {
     ListaLinhaProdutos* temp = stockLoja->lista_linhas; // pegar no primeiro no
     ListaLinhaProdutos* prev = NULL; // nó anterior
 
-    // Se o primeiro nó contém a chave a ser excluída
     if (temp != NULL && temp->linha->linhaID == codigoLinha) {
         stockLoja->lista_linhas = (ListaLinhaProdutos *) temp->prox_linha;
         free(temp);
         return 0;
     }
 
-    // Procura a chave a ser excluída, mantendo o nó anterior, pois precisamos alterar 'prev->next'
     while (temp != NULL && temp->linha->linhaID != codigoLinha) {
         prev = temp;
         temp = (ListaLinhaProdutos *) temp->prox_linha;
     }
-
-    // Se a chave não estava presente na lista
     if (temp == NULL) return 1;
 
-    // Remove o linha da lista
     if (prev != NULL) {
         prev->prox_linha = temp->prox_linha;
     }
 
-    free(temp);  // Libera a memória da linha
-
+    free(temp);
     return 0;
 }
 
@@ -143,7 +133,7 @@ int atualizarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha) {
     ListaLinhaProdutos* current = stockLoja->lista_linhas;
     while (current != NULL) {
         if (current->linha->linhaID == linha->linhaID) {
-            current->linha = linha;
+            strncpy(current->linha->nome, linha->nome, sizeof(current->linha->nome));
             return 0;
         }
         current = (ListaLinhaProdutos *) current->prox_linha;
@@ -353,45 +343,91 @@ ParamAdicionalProduto* criarParametroAdicionalProduto(char* nome, char* valor) {
 // Adiciona um parâmetro adicional a uma lista de parâmetros adicionais de produtos
 // Utiliza a lista de parâmetros adicionais de produtos como pointer e o parâmetro a adicionar como pointer
 // Usa o método de push para adicionar um parâmetro a lista de parâmetros adicionais de produtos
-int adicionarParametroAdicionalProduto(ListaParamAdicionalProduto** lista, ParamAdicionalProduto* parametro) {
+int adicionarParametroAdicionalProduto(Produto* produto, ParamAdicionalProduto* parametro) {
     ListaParamAdicionalProduto* novo_no = (ListaParamAdicionalProduto*) malloc(sizeof(ListaParamAdicionalProduto));
     if (novo_no == NULL) return 1;
 
-    novo_no->parametro = parametro;
-    novo_no->prox_parametro = *lista;
-    *lista = novo_no;
+    ParamAdicionalProduto* novo_parametro = (ParamAdicionalProduto*) malloc(sizeof(ParamAdicionalProduto));
+    if (novo_parametro == NULL) {
+        free(novo_no);
+        return 1;
+    }
+
+    *novo_parametro = *parametro;
+    novo_parametro->id = produto->num_parametros + 1;
+
+    novo_no->parametro = novo_parametro;
+    novo_no->prox_parametro = NULL;
+    if (produto->parametros != NULL) {
+        novo_no->prox_parametro = produto->parametros;
+    }
+
+    produto->parametros = novo_no;
+    produto->num_parametros++;
+
     return 0;
 }
 
 // Remove um parâmetro adicional de uma lista de parâmetros adicionais de produtos
 // Utiliza a lista de parâmetros adicionais de produtos como pointer e o código do parâmetro a remover
-int removerParametroAdicionalProduto(ListaParamAdicionalProduto** lista, unsigned int codigoParametro) {
-    ListaParamAdicionalProduto* temp = *lista;
+int removerParametroAdicionalProduto(Produto* produto, unsigned int codigoParametro) {
+    ListaParamAdicionalProduto* temp = produto->parametros;
     ListaParamAdicionalProduto* prev = NULL;
-
-    if (temp != NULL && temp->parametro->id == codigoParametro) {
-        *lista = temp->prox_parametro;
-        free(temp);
-        return 0;
-    }
 
     while (temp != NULL && temp->parametro->id != codigoParametro) {
         prev = temp;
         temp = temp->prox_parametro;
     }
+    if (temp == NULL) return 0;
 
-    if (temp == NULL) return 1;
-    if (prev != NULL) {
-        prev->prox_parametro = temp->prox_parametro;
+    if (prev == NULL) {
+        produto->parametros = temp->prox_parametro;
     } else {
-        *lista = temp->prox_parametro;
+        prev->prox_parametro = temp->prox_parametro;
     }
+
     free(temp);
+    return 1;
+}
+
+int atualizarParametroAdicional(Produto* produto, ParamAdicionalProduto* parametro) {
+    ListaParamAdicionalProduto* current = produto->parametros;
+    while (current != NULL) {
+        if (current->parametro->id == parametro->id) {
+            strncpy(current->parametro->nome, parametro->nome, sizeof(current->parametro->nome));
+            strncpy(current->parametro->valor, parametro->valor, sizeof(current->parametro->valor));
+            return 0;
+        }
+        current = current->prox_parametro;
+    }
+    return 1;
+}
+
+int adicionarParametroAdicionalLista(ListaParamAdicionalProduto** lista, ParamAdicionalProduto* parametro) {
+    ListaParamAdicionalProduto* novo_no = (ListaParamAdicionalProduto*) malloc(sizeof(ListaParamAdicionalProduto));
+    if (novo_no == NULL) {
+        return 1;
+    }
+
+    ParamAdicionalProduto* novo_parametro = (ParamAdicionalProduto*) malloc(sizeof(ParamAdicionalProduto));
+    if (novo_parametro == NULL) {
+        free(novo_no);
+        return 1;
+    }
+
+    *novo_parametro = *parametro;
+    novo_parametro->id = getNumeroParametrosAdicionais(*lista) + 1;
+
+    novo_no->parametro = novo_parametro;
+    novo_no->prox_parametro = *lista;
+    *lista = novo_no;
+
     return 0;
 }
 
-ParamAdicionalProduto* obterParametroAdicionalPorID(ListaParamAdicionalProduto* lista, unsigned int codigoParametro) {
-    ListaParamAdicionalProduto* current = lista;
+
+ParamAdicionalProduto* obterParametroAdicionalPorID(Produto* produto, unsigned int codigoParametro) {
+    ListaParamAdicionalProduto* current = produto->parametros;
     while (current != NULL) {
         if (current->parametro->id == codigoParametro) {
             return current->parametro;
@@ -401,8 +437,8 @@ ParamAdicionalProduto* obterParametroAdicionalPorID(ListaParamAdicionalProduto* 
     return NULL;
 }
 
-ParamAdicionalProduto* obterParametroAdicionalPorNome(ListaParamAdicionalProduto* lista, char* nomeParametro) {
-    ListaParamAdicionalProduto* current = lista;
+ParamAdicionalProduto* obterParametroAdicionalPorNome(Produto* produto, char* nomeParametro) {
+    ListaParamAdicionalProduto* current = produto->parametros;
     while (current != NULL) {
         if (strcmp(current->parametro->nome, nomeParametro) == 0) {
             return current->parametro;
@@ -410,13 +446,6 @@ ParamAdicionalProduto* obterParametroAdicionalPorNome(ListaParamAdicionalProduto
         current = current->prox_parametro;
     }
     return NULL;
-}
-
-int atualizarParametroAdicional(ListaParamAdicionalProduto* lista, ParamAdicionalProduto* parametro) {
-    ParamAdicionalProduto* param_anterior = (ParamAdicionalProduto *) obterParametroAdicionalPorID(lista, parametro->id);
-    if (param_anterior == NULL) return 1;
-    *param_anterior = *parametro;
-    return 0;
 }
 
 unsigned int getNumeroParametrosAdicionais(ListaParamAdicionalProduto* lista) {

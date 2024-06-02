@@ -93,16 +93,18 @@ ListaParamAdicionalProduto* criarListaParamAdicionaisProduto();
 // cria uma instância de um parâmetro adicional para um produto
 ParamAdicionalProduto* criarParametroAdicionalProduto(char* nome, char* valor);
 // adiciona um parâmetro adicional a uma lista de parâmetros adicionais de produtos
-int adicionarParametroAdicionalProduto(ListaParamAdicionalProduto** lista, ParamAdicionalProduto* parametro);
+int adicionarParametroAdicionalProduto(Produto* produto, ParamAdicionalProduto* parametro);
 // remove um parâmetro adicional de uma lista de parâmetros adicionais de produtos
-int removerParametroAdicionalProduto(ListaParamAdicionalProduto** lista, unsigned int codigoParametro);
+int removerParametroAdicionalProduto(Produto* produto, unsigned int codigoParametro);
 // procura por um parâmetro adicional numa lista de parâmetros adicionais de produtos por ID
-ParamAdicionalProduto* obterParametroAdicionalPorID(ListaParamAdicionalProduto* lista, unsigned int codigoParametro);
-// procura por um parâmetro adicional numa lista de parâmetros adicionais de produtos por nome
-ParamAdicionalProduto* obterParametroAdicionalPorNome(ListaParamAdicionalProduto* lista, char* nomeParametro);
-// atualiza um parâmetro adicional numa lista de parâmetros adicionais de produtos
-int atualizarParametroAdicional(ListaParamAdicionalProduto* lista, ParamAdicionalProduto* parametro);
+int atualizarParametroAdicional(Produto* produto, ParamAdicionalProduto* parametro);
+// adiciona um parametro adicional a uma lista de parametros adicionais de produtos
+int adicionarParametroAdicionalLista(ListaParamAdicionalProduto** lista, ParamAdicionalProduto* parametro);
 // obtem o número de parâmetros adicionais numa lista de parâmetros adicionais de produtos
+ParamAdicionalProduto* obterParametroAdicionalPorID(Produto* produto, unsigned int codigoParametro);
+// procura por um parâmetro adicional numa lista de parâmetros adicionais de produtos por nome
+ParamAdicionalProduto* obterParametroAdicionalPorNome(Produto* produto, char* nomeParametro);
+// atualiza um parâmetro adicional numa lista de parâmetros adicionais de produtos
 unsigned int getNumeroParametrosAdicionais(ListaParamAdicionalProduto* lista);
 
 

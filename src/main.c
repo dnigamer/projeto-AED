@@ -28,7 +28,10 @@ int main(int argc, char *argv[])
 
     // TEMPORARIO
     // adicionar produto a linha de produtos
-    Produto produto = { 0, 0, 0,"Maçã", "Fruta", "Golden", 10, 0.5, 0, NULL };
+    ListaParamAdicionalProduto *parametros = NULL;
+    ParamAdicionalProduto parametro = { 0, "Cor", "Vermelho" };
+    Produto produto = { 0, 0, 0,"Maçã", "Fruta", "Golden", 10, 0.5, 0, parametros };
+    adicionarParametroAdicionalProduto(&produto, &parametro);
     adicionarProduto(obterLinhaProdutosPorID(&stockGeral, 2), &produto);
 
     Produto produto2 = { 0, 0, 0,"Maçã", "Fruta", "Grande", 10, 0.5, 0, NULL };

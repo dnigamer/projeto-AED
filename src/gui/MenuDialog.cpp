@@ -7,9 +7,25 @@
 #include "MenuDialog.h"
 #include "ui_MenuDialog.h"
 
-MenuDialog::MenuDialog(QWidget *parent) :
-        QDialog(parent), ui(new Ui::MenuDialog) {
+MenuDialog::MenuDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MenuDialog) {
     ui->setupUi(this);
+
+   connect(ui->addParam, &QPushButton::clicked, [this]() {
+        int row = ui->tabParam->rowCount();
+        ui->tabParam->setRowCount(row + 1);
+        ui->tabParam->setItem(row, 0, new QTableWidgetItem(""));
+        ui->tabParam->item(row, 0)->setFlags(ui->tabParam->item(row, 0)->flags() | Qt::ItemIsEditable);
+        ui->tabParam->setCurrentCell(row, 0);
+        ui->tabParam->editItem(ui->tabParam->item(row, 0));
+    });
+
+    connect(ui->delParam, &QPushButton::clicked, [this]() {
+        int row = ui->tabParam->currentRow();
+        if (row != -1) {
+            ui->tabParam->removeRow(row);
+        }
+    });
+
 }
 
 void MenuDialog::setNomeJanela(int type, const QString &dados) {
@@ -55,7 +71,7 @@ void MenuDialog::setPreco(const QString &dados) {
 
 void MenuDialog::setParametros(const QString &dados) {
     QStringList parametros = dados.split(";");
-    ui->tabParam->setRowCount(parametros.size());
+    ui->tabParam->setRowCount(static_cast<int>(parametros.size()));
     ui->tabParam->setColumnCount(1);
     ui->tabParam->setHorizontalHeaderLabels(QStringList() << "Parâmetros");
     for (int i = 0; i < parametros.size(); i++) {
@@ -67,6 +83,9 @@ void MenuDialog::addParametro(const QString &nome, const QString &valor) {
     int row = ui->tabParam->rowCount();
     ui->tabParam->setRowCount(row + 1);
     ui->tabParam->setItem(row, 0, new QTableWidgetItem(nome));
+    ui->tabParam->setItem(row, 1, new QTableWidgetItem(valor));
+    ui->tabParam->item(row, 0)->setFlags(ui->tabParam->item(row, 0)->flags() | Qt::ItemIsEditable);
+    ui->tabParam->item(row, 1)->setFlags(ui->tabParam->item(row, 1)->flags() | Qt::ItemIsEditable);
 }
 
 QString MenuDialog::getNome() {
