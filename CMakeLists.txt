@@ -28,17 +28,21 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
 
 add_executable(Projeto src/main.c
         src/produtos.h
+        src/operacoes.c
+        src/operacoes.h
         src/gui/gui.cpp
         src/gui/gui.h
         src/gui/mainmenu.cpp
         src/gui/mainmenu.h
-        src/operacoes.c
-        src/operacoes.h
         src/gui/MenuDialog.cpp
         src/gui/MenuDialog.h
         src/gui/LinhaDialog.cpp
         src/gui/LinhaDialog.h
         src/gui/LinhaDialog.ui
+        src/cli/cli.c
+        src/cli/cli.h
+        src/cli/ioutil.c
+        src/cli/ioutil.h
 )
 
 message("-- Linking Qt6")

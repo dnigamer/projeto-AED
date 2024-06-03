@@ -20,7 +20,6 @@ class MainMenu : public QMainWindow {
     Q_OBJECT
 
 public slots:
-
     void onLinhasLVClicked(const QModelIndex &index);
     void onProdutosLVClicked(const QModelIndex &index);
     void onModelosLVClicked(const QModelIndex &index);

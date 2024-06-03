@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "operacoes.h"
 #include "gui/gui.h"
+#include "cli/cli.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #define CLEAR "cls"
@@ -45,7 +46,8 @@ int main(int argc, char *argv[])
     adicionarProduto(obterLinhaProdutosPorID(&stockGeral, 2), &produto4);
 
     // chama a função para iniciar a GUI
-    startGui(argc, argv, &stockGeral);
+    //startGui(argc, argv, &stockGeral);
+    startCLI(&stockGeral);
     system(CLEAR);
 
     return 0;

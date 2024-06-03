@@ -5,172 +5,107 @@
 #include "ui_MainMenu.h"
 
 StockLoja *stock;
-int selLinha = 0;
-int selProduto = 0;
-int selModelo = 0;
+int selLinha = 0, selProduto = 0, selModelo = 0;
 
-// Função para abrir a base de dados (menu Ficheiro -> Abrir)
-void MainMenu::open()
-{
+void MainMenu::open() {
     statusBar()->showMessage("Ação abrir chamada");
 }
 
-// Função para salvar a base de dados (menu Ficheiro -> Salvar)
-void MainMenu::save()
-{
-    QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setText("As alterações não foram guardadas.");
-    msgBox.setInformativeText("Deseja guardar as alterações?");
-    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Save);
+void MainMenu::save() {
+    QMessageBox msgBox(QMessageBox::Warning, "Atenção", "As alterações não foram guardadas. Deseja guardar as alterações?", QMessageBox::Save | QMessageBox::No, this);
     msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-
-    int ret = msgBox.exec();
-    if (ret == QMessageBox::Save) {
-        statusBar()->showMessage("Save was clicked");
-    } else {
-        statusBar()->showMessage("No was clicked");
-    }
-
+    statusBar()->showMessage((msgBox.exec() == QMessageBox::Save) ? "Save was clicked" : "No was clicked");
 }
 
-// Função para sair da aplicação (menu Ficheiro -> Sair)
-void MainMenu::quit()
-{
-    statusBar()->showMessage("Ação sair");
-
-    QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setText("Tem a certeza que deseja sair?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
+void MainMenu::quit() {
+    QMessageBox msgBox(QMessageBox::Warning, "Atenção", "Tem a certeza que deseja sair?",
+                        QMessageBox::Yes | QMessageBox::No, this);
     msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-
-    int ret = msgBox.exec();
-
-    switch (ret) {
-        case QMessageBox::Yes:
-            QMainWindow::close();
-            break;
-        case QMessageBox::No:
-            statusBar()->showMessage("Não foi clicado");
-            break;
-        default:
-            break;
-    }
+    if (msgBox.exec() == QMessageBox::Yes) QMainWindow::close();
+    else statusBar()->showMessage("Não foi clicado");
 }
 
 MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) {
-    bool problemas = false;
-    ui->setupUi(this); // Set up the UI
+    ui->setupUi(this);
 
-    #ifdef Q_OS_MACOS
-        createMacMenu();
-    #endif
+    QAction* actions[] = {
+        new QAction(tr("Abrir base de dados"), this),
+        new QAction(tr("Salvar para base de dados"), this),
+        new QAction(tr("Sair"), this)
+    };
+    actions[0]->setShortcut(QKeySequence::Open);
+    actions[1]->setShortcut(QKeySequence::Save);
+    actions[2]->setShortcut(QKeySequence::Quit);
 
-    // Ações para abrir, salvar e sair no menu de title "Ficheiro"
-    auto *actionOpen = new QAction(tr("Abrir base de dados"), this);
-    actionOpen->setShortcut(QKeySequence::Open);
-    auto *actionSave = new QAction(tr("Salvar para base de dados"), this);
-    actionSave->setShortcut(QKeySequence::Save);
-    auto *actionExit = new QAction(tr("Sair"), this);
-    actionExit->setShortcut(QKeySequence::Quit);
+    connect(actions[0], &QAction::triggered, this, &MainMenu::open);
+    connect(actions[1], &QAction::triggered, this, &MainMenu::save);
+    connect(actions[2], &QAction::triggered, this, &MainMenu::quit);
 
-    // Conectar funções às ações (Ficheiro -> Abrir, Ficheiro -> Salvar, Ficheiro -> Sair)
-    connect(actionOpen, &QAction::triggered, this, &MainMenu::open);
-    connect(actionSave, &QAction::triggered, this, &MainMenu::save);
-    connect(actionExit, &QAction::triggered, this, &MainMenu::quit);
-
-    // Assinar ações aos itens de menu (Ficheiro -> Abrir, Ficheiro -> Salvar, Ficheiro -> Sair)
-    ui->menuFicheiro->addAction(actionOpen);
-    ui->menuFicheiro->addAction(actionSave);
+    ui->menuFicheiro->addActions({actions[0], actions[1]});
     ui->menuFicheiro->addSeparator();
-    ui->menuFicheiro->addAction(actionExit);
+    ui->menuFicheiro->addAction(actions[2]);
 
-    // operações sobre ListViews - não permitir edição
-    ui->linhasLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->produtosLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->modelosLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    auto listViews = {ui->linhasLV, ui->produtosLV, ui->modelosLV};
+    for (auto lv : listViews) lv->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    // Listeners para ListViews - deteção de clique
     connect(ui->linhasLV, &QListView::clicked, this, &MainMenu::onLinhasLVClicked);
     connect(ui->produtosLV, &QListView::clicked, this, &MainMenu::onProdutosLVClicked);
     connect(ui->modelosLV, &QListView::clicked, this, &MainMenu::onModelosLVClicked);
 
-    // Listeners para botoes
-    // Tab Stock
-    connect(ui->adMarcaBtn, &QPushButton::clicked, this, &MainMenu::onAdicionarLinhaBtnClicked);
-    connect(ui->delMarcaBtn, &QPushButton::clicked, this, &MainMenu::onRemoverLinhaBtnClicked);
-    connect(ui->edMarcaBtn, &QPushButton::clicked, this, &MainMenu::onAtualizarLinhaBtnClicked);
-    connect(ui->adModeloBtn, &QPushButton::clicked, this, &MainMenu::onAdicionarProdutoBtnClicked);
-    connect(ui->delModeloBtn, &QPushButton::clicked, this, &MainMenu::onRemoverProdutoBtnClicked);
-    connect(ui->edModeloBtn, &QPushButton::clicked, this, &MainMenu::onAtualizarProdutoBtnClicked);
+    auto buttons = {
+        std::make_pair(ui->adMarcaBtn, &MainMenu::onAdicionarLinhaBtnClicked),
+        std::make_pair(ui->delMarcaBtn, &MainMenu::onRemoverLinhaBtnClicked),
+        std::make_pair(ui->edMarcaBtn, &MainMenu::onAtualizarLinhaBtnClicked),
+        std::make_pair(ui->adModeloBtn, &MainMenu::onAdicionarProdutoBtnClicked),
+        std::make_pair(ui->delModeloBtn, &MainMenu::onRemoverProdutoBtnClicked),
+        std::make_pair(ui->edModeloBtn, &MainMenu::onAtualizarProdutoBtnClicked),
+        std::make_pair(ui->nomeLojaModBtn, &MainMenu::onNomeLojaModBtnClicked),
+        std::make_pair(ui->atualizarStockInfoBtn, &MainMenu::onAtualizarStockInfoBtnClicked),
+        std::make_pair(ui->apagaLinhasStockBtn, &MainMenu::onApagaLinhasStockBtnClicked),
+        std::make_pair(ui->apagaProdutosStockBtn, &MainMenu::onApagaProdutosStockBtnClicked)
+    };
+    for (auto [button, slot] : buttons) connect(button, &QPushButton::clicked, this, slot);
 
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainMenu::onTabChanged);
 
-    // Tab Definições
-    connect(ui->nomeLojaModBtn, &QPushButton::clicked, this, &MainMenu::onNomeLojaModBtnClicked);
-    connect(ui->atualizarStockInfoBtn, &QPushButton::clicked, this, &MainMenu::onAtualizarStockInfoBtnClicked);
-    connect(ui->apagaLinhasStockBtn, &QPushButton::clicked, this, &MainMenu::onApagaLinhasStockBtnClicked);
-    connect(ui->apagaProdutosStockBtn, &QPushButton::clicked, this, &MainMenu::onApagaProdutosStockBtnClicked);
-
-    // Listeners para tabgroups
-    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainMenu::onTabChanged); // mudança de tab
-
-    // Adicionar logo no sitio logoLoja
     if (!QFile::exists("logo.png")) {
         statusBar()->showMessage("Logo não encontrado. Aplicação funcionará sem o logo.");
         ui->logoLoja->setText("N/D");
-        problemas = true;
     } else {
         QPixmap logo("logo.png");
         ui->logoLoja->setPixmap(logo);
         ui->logoLoja->setScaledContents(true);
     }
 
-    // Mostra informação sobre a aplicação na barra de estado
-    if (!problemas) statusBar()->showMessage("Pronto");
+    statusBar()->showMessage("Pronto");
 }
 
-// Destruidor da classe MainMenu (janela) - liberta memória
-MainMenu::~MainMenu()
-{
+MainMenu::~MainMenu() {
     delete ui;
 }
 
-// Função para definir o stock da loja em C++ para a janela
 void MainMenu::setStock(StockLoja *ptr) {
-    if (ptr == nullptr) return;
+    if (!ptr) return;
     stock = ptr;
     ui->nomeLojaLab->setText(ptr->nome);
 }
 
-// Função para mostrar as linhas de produtos na ListView baseado no stock
 void MainMenu::setLinhas(StockLoja *ptr) {
-    if (ptr == nullptr) return;
+    if (!ptr) return;
 
     QStringList list;
-    ListaLinhaProdutos *current = ptr->lista_linhas;
-    while (current != nullptr) {
-        LinhaProdutos linha = *current->linha;
-        QString linhaStr = linha.nome;
-        list << linhaStr;
-        current = (ListaLinhaProdutos *) current->prox_linha;
-    }
+    for (ListaLinhaProdutos *current = ptr->lista_linhas; current; current = current->prox_linha)
+        list << current->linha->nome;
     std::reverse(list.begin(), list.end());
 
     auto *model = new QStringListModel(this);
     model->setStringList(list);
     ui->linhasLV->setModel(model);
 
-    if (list.empty()) return;
-    if (ui->linhasLV->selectionModel() == nullptr) return;
-
-    // Conectar a função onLinhasLVClicked ao evento de clique na ListView para mostrar os produtos de uma linha
-    connect(ui->linhasLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onLinhasLVClicked);
+    if (!list.empty() && ui->linhasLV->selectionModel())
+        connect(ui->linhasLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onLinhasLVClicked);
 }
 
-// Função para mostrar os produtos na ListView baseado na linha de produtos selecionada na primeira ListView
 void MainMenu::setProdutos(LinhaProdutos *ptr) {
     if (ptr == nullptr) {
         ui->produtosLV->setModel(nullptr);
@@ -192,7 +127,6 @@ void MainMenu::setProdutos(LinhaProdutos *ptr) {
         }
         current = (ListaProdutos *) current->prox_produto;
     }
-    // Ordenar a lista de produtos
     std::sort(list.begin(), list.end());
     model->setStringList(list);
     ui->produtosLV->setModel(model);
@@ -200,43 +134,31 @@ void MainMenu::setProdutos(LinhaProdutos *ptr) {
     if (list.empty()) return;
     if (ui->modelosLV->selectionModel() == nullptr) return;
 
-    // Conectar a função onProdutosLVClicked ao evento de clique na ListView para mostrar os modelos de um produto na linha
     connect(ui->modelosLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onProdutosLVClicked);
 }
 
-// Função para mostrar os modelos na ListView baseado no produto selecionado na segunda ListView
+
 void MainMenu::setModelos(ListaProdutos *ptr) {
-    if (ptr == nullptr) {
+    if (!ptr) {
         ui->modelosLV->setModel(nullptr);
         return;
     }
 
-    auto *model = new QStringListModel(this);
     QStringList list;
+    for (ListaProdutos *current = ptr; current; current = current->prox_produto)
+        list << current->produto->modelo;
 
-    ListaProdutos *current = ptr;
-    while (current != nullptr) {
-        Produto produto = *current->produto;
-        QString produtoStr = produto.modelo;
-        list << produtoStr;
-        current = (ListaProdutos *) current->prox_produto;
-    }
-
-    // Ordenar a lista de modelos
     std::sort(list.begin(), list.end());
+    auto *model = new QStringListModel(this);
     model->setStringList(list);
     ui->modelosLV->setModel(model);
 
-    if (list.empty()) return;
-    if (ui->modelosLV->selectionModel() == nullptr) return;
-
-    // Conectar a função onModelosLVClicked ao evento de clique na ListView para mostrar a informação de um modelo
-    connect(ui->modelosLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onModelosLVClicked);
+    if (!list.empty() && ui->modelosLV->selectionModel())
+        connect(ui->modelosLV->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainMenu::onModelosLVClicked);
 }
 
-// Função para mostrar a informação de um modelo na janela
 void MainMenu::setModeloInfo(Produto *ptr) {
-    if (ptr == nullptr) {
+    auto clearModelInfo = [this]() {
         ui->codigoModeloText->clear();
         ui->nomeModeloText->clear();
         ui->quantModeloText->clear();
@@ -245,6 +167,10 @@ void MainMenu::setModeloInfo(Produto *ptr) {
         ui->outrosParamTV->setRowCount(0);
         ui->outrosParamTV->setColumnCount(2);
         ui->outrosParamTV->setHorizontalHeaderLabels(QStringList() << "Nome" << "Valor");
+    };
+
+    if (!ptr) {
+        clearModelInfo();
         return;
     }
 
@@ -271,12 +197,11 @@ void MainMenu::setModeloInfo(Produto *ptr) {
     }
 }
 
-// Função para mostrar a informação do stock na tab Definições
 void MainMenu::tabDefinicoes() {
     ui->nomeLojaModText->setText(ui->nomeLojaLab->text());
     ui->numLinhasStockText->setText(QString::number(stock->num_linhas));
-    ui->numTiposStockText->setText(QString::number(getNumeroTipoProdutosStock(stock)));  //implementado em C
-    ui->numProdutosStockText->setText(QString::number(getNumeroProdutosStock(stock)));  //implementado em C
+    ui->numTiposStockText->setText(QString::number(getNumeroTipoProdutosStock(stock)));
+    ui->numProdutosStockText->setText(QString::number(getNumeroProdutosStock(stock)));
 }
 
 // Função para recarregar as tabs (dados estáticos) - para quando se muda de tab
@@ -489,7 +414,6 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
     }
 }
 
-// Função para remover um produto de uma linha de produtos
 void MainMenu::onRemoverProdutoBtnClicked() {
     if (ui->linhasLV->currentIndex().row() == -1) {
         ui->statusbar->showMessage("ERRO!! - Selecione uma linha de produtos para remover um produto.");
@@ -692,26 +616,12 @@ void MainMenu::onApagaProdutosStockBtnClicked() {
 
 // Processamento de mudança de tab
 void MainMenu::onTabChanged(int index) {
-    if (index == 0) { // stock
-        setLinhas(stock);
-        setProdutos(nullptr);
-        setModelos(nullptr);
-        setModeloInfo(nullptr);
-    } else if (index == 1) { // pesquisa
-        ui->procuraTE->clear();
-        ui->resultPesqTV->clear();
-    } else if (index == 2) { // definições
-        MainMenu::reloadTabs();
-    }
+    reloadTabs();
 }
 
 #ifdef Q_OS_MACOS
-// Função para definir o menu nativo do macOS
-// Compatibilidade desconhecida abaixo de macOS Mojave!!
-void MainMenu::createMacMenu()
-{
+void MainMenu::createMacMenu() {
     QMenuBar* menuBar = ui->menubar;
     menuBar->setNativeMenuBar(true);
 }
-
 #endif
