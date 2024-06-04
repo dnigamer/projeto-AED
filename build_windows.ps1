@@ -1,3 +1,5 @@
+# TODO: Verificar por git e visual studio antes de começar a build
+
 param (
     [string]$BUILD_TYPE
 )

@@ -12,6 +12,7 @@
 
 #include "../operacoes.h"
 #include "ioutil.h"
+#include "../storage.h"
 
 #define clear() system(CLEAR)
 

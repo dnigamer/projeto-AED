@@ -3,6 +3,7 @@
 #include "operacoes.h"
 #include "gui/gui.h"
 #include "cli/cli.h"
+#include "storage.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #define CLEAR "cls"
@@ -13,7 +14,7 @@
 int main(int argc, char *argv[])
 {
     // Define uma instância de stock
-    StockLoja stockGeral = { "Mercado do bolhão", 0, NULL};
+    /*StockLoja stockGeral = { "Mercado do bolhão", 0, NULL};
 
     // cria uma linha de produtos e adiciona ao stock
     LinhaProdutos linhatemp;
@@ -47,8 +48,16 @@ int main(int argc, char *argv[])
 
     // chama a função para iniciar a GUI
     //startGui(argc, argv, &stockGeral);
-    startCLI(&stockGeral);
-    system(CLEAR);
+    guardarStock(&stockGeral, "stock.json");
+    printf("Stock guardado\n");*/
+
+    StockLoja stock2 = criarStockLoja("");
+    //carregarStock(&stock2, "stock.json");
+    //startGui(argc, argv, &stock2);
+
+    // chama a função para iniciar a CLI
+    startCLI(&stock2);
+    guardarStock(&stock2, "stock.json");
 
     return 0;
 }

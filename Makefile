@@ -5,7 +5,7 @@ all: build run
 
 cmake:
 	@mkdir -p $(BUILD_DIR)
-	@cd $(BUILD_DIR) && cmake ..
+	@cd $(BUILD_DIR) && cmake -DCMAKE_BUILD_TYPE=Debug ..
 
 build: cmake
 	@$(MAKE) -C $(BUILD_DIR)
