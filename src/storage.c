@@ -14,11 +14,11 @@ static void parse_parametros(Produto* produto, cJSON* parametros_json);
 static void parse_produtos(LinhaProdutos* linha, cJSON* produtos_json);
 static void parse_linhas(StockLoja* stock, cJSON* linhas_json);
 
-void guardarStock(StockLoja* stock, const char* nome_arquivo) {
+int guardarStock(StockLoja* stock, const char* nome_arquivo) {
     FILE* arquivo = fopen(nome_arquivo, "w");
     if (arquivo == NULL) {
         printf("Não foi possível abrir o arquivo %s\n", nome_arquivo);
-        return;
+        return 0;
     }
 
     fprintf(arquivo, "{\n");
@@ -106,7 +106,7 @@ void guardarStock(StockLoja* stock, const char* nome_arquivo) {
     fprintf(arquivo, "}\n");
 
     fclose(arquivo);
-    printf("Stock guardado\n");
+    return 1;
 }
 
 void removeNewlineJSON(const char* nome_arquivo) {
@@ -140,13 +140,19 @@ void removeNewlineJSON(const char* nome_arquivo) {
     rename("temp.json", nome_arquivo);
 }
 
-void carregarStock(StockLoja* stock, const char* nome_arquivo) {
+int carregarStock(StockLoja* stock, const char* nome_arquivo) {
+    FILE* arquivo = fopen(nome_arquivo, "r");
+    if (arquivo == NULL) {
+        printf("O arquivo %s não existe\n", nome_arquivo);
+        return 0;
+    }
+
     removeNewlineJSON(nome_arquivo);
 
     char* json = read_file(nome_arquivo);
     if (json == NULL) {
         printf("Não foi possível ler o arquivo %s\n", nome_arquivo);
-        return;
+        return 0;
     }
 
     cJSON* root = cJSON_Parse(json);
@@ -157,7 +163,7 @@ void carregarStock(StockLoja* stock, const char* nome_arquivo) {
             printf("Erro antes de: %s\n", error_ptr);
         }
         free(json);
-        return;
+        return 0;
     }
 
     cJSON* nome = cJSON_GetObjectItem(root, "nome");
@@ -179,7 +185,8 @@ void carregarStock(StockLoja* stock, const char* nome_arquivo) {
 
     cJSON_Delete(root);
     free(json);
-    printf("Stock carregado\n");
+
+    return 1;
 }
 
 static char* read_file(const char* filename) {

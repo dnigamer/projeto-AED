@@ -52,12 +52,13 @@ int main(int argc, char *argv[])
     printf("Stock guardado\n");*/
 
     StockLoja stock2 = criarStockLoja("");
-    //carregarStock(&stock2, "stock.json");
+    carregarStock(&stock2, "stock.json");
     //startGui(argc, argv, &stock2);
 
     // chama a função para iniciar a CLI
     startCLI(&stock2);
     guardarStock(&stock2, "stock.json");
+    printf("Stock guardado\n");
 
     return 0;
 }

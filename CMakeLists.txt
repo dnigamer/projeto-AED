@@ -43,6 +43,10 @@ add_executable(Projeto src/main.c
         src/cli/cli.h
         src/cli/ioutil.c
         src/cli/ioutil.h
+        src/storage.c
+        src/storage.h
+        src/cJSON.c
+        src/cJSON.h
 )
 
 message("-- Linking Qt6")

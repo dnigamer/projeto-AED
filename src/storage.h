@@ -7,7 +7,7 @@
 
 #include "produtos.h"
 
-void guardarStock(StockLoja* stock, const char* nome_arquivo);
-void carregarStock(StockLoja *stock, const char* nomeFicheiro);
+int guardarStock(StockLoja* stock, const char* nome_arquivo);
+int carregarStock(StockLoja *stock, const char* nomeFicheiro);
 
 #endif //PROJETO_STORAGE_H

@@ -88,7 +88,7 @@ int adicionarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos linha) {
     ListaLinhaProdutos* novo_no = (ListaLinhaProdutos*) malloc(sizeof(ListaLinhaProdutos));
     if (novo_no == NULL) return 1;
 
-    linha.linhaID = stockLoja->num_linhas + 1;
+    linha.linhaID = stockLoja->lista_linhas->linha->linhaID + 1;
     novo_no->linha = (LinhaProdutos *) malloc(sizeof(LinhaProdutos));
     if (novo_no->linha == NULL) return 1;
 
@@ -122,6 +122,8 @@ int removerLinhaProdutos(StockLoja* stockLoja, unsigned int codigoLinha) {
     if (prev != NULL) {
         prev->prox_linha = temp->prox_linha;
     }
+
+    stockLoja->num_linhas--;
 
     free(temp);
     return 0;

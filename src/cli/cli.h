@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include <ctype.h>
 
 #include "../operacoes.h"
 #include "ioutil.h"
