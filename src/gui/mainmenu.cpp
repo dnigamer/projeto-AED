@@ -509,16 +509,20 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted) {
-        if (dialog.getNome().length() > 50) {
-            criarWarningMessageBox("ERRO!!", "Nome do produto não pode ter mais de 50 caracteres.", 0);
+        if (dialog.getNome().length() > 50 || dialog.getModelo().length() > 50 || dialog.getCategoria().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Nome, modelo e tipo do produto não pode ter mais de 50 caracteres.", 0);
             return;
         }
-        if (dialog.getModelo().length() > 50) {
-            criarWarningMessageBox("ERRO!!", "Modelo do produto não pode ter mais de 50 caracteres.", 0);
+        if (dialog.getNome().length() == 0 || dialog.getModelo().length() == 0 || dialog.getCategoria().length() == 0) {
+            criarWarningMessageBox("ERRO!!", "Nome, modelo e tipo do produto não podem ser vazios.", 0);
             return;
         }
-        if (dialog.getCategoria().length() > 50) {
-            criarWarningMessageBox("ERRO!!", "Categoria do produto não pode ter mais de 50 caracteres.", 0);
+        if (dialog.getQuantidade() < 0) {
+            criarWarningMessageBox("ERRO!!", "Quantidade do produto não pode ser negativa.", 0);
+            return;
+        }
+        if (dialog.getPreco() < 0) {
+            criarWarningMessageBox("ERRO!!", "Preço do produto não pode ser negativo.", 0);
             return;
         }
 
@@ -535,12 +539,12 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
 
         ListaParamAdicionalProduto* parametros = nullptr;
         for (int i = 0; i < dialog.getNumeroParametros(); i++) {
-            if (dialog.getNomeParametro(i).length() > 50) {
-                criarWarningMessageBox("ERRO!!", "Nome do parâmetro não pode ter mais de 50 caracteres.", 0);
+            if (dialog.getNomeParametro(i).length() > 50 || dialog.getValorParametro(i).length() > 50) {
+                criarWarningMessageBox("ERRO!!", "Nome e valor do parâmetro não podem ter mais de 50 caracteres.", 0);
                 return;
             }
-            if (dialog.getValorParametro(i).length() > 50) {
-                criarWarningMessageBox("ERRO!!", "Valor do parâmetro não pode ter mais de 50 caracteres.", 0);
+            if (dialog.getNomeParametro(i) == "" || dialog.getValorParametro(i) == "") {
+                criarWarningMessageBox("ERRO!!", "Nome e valor do parâmetro não podem ser vazios.", 0);
                 return;
             }
             std::string nomeParam = dialog.getNomeParametro(i).toStdString();
@@ -704,16 +708,20 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted) {
-        if (dialog.getNome().length() > 50) {
-            criarWarningMessageBox("ERRO!!", "Nome do produto não pode ter mais de 50 caracteres.", 0);
+        if (dialog.getNome().length() > 50 || dialog.getModelo().length() > 50 || dialog.getCategoria().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Nome, modelo e tipo do produto não pode ter mais de 50 caracteres.", 0);
             return;
         }
-        if (dialog.getModelo().length() > 50) {
-            criarWarningMessageBox("ERRO!!", "Modelo do produto não pode ter mais de 50 caracteres.", 0);
+        if (dialog.getNome().length() == 0 || dialog.getModelo().length() == 0 || dialog.getCategoria().length() == 0) {
+            criarWarningMessageBox("ERRO!!", "Nome, modelo e tipo do produto não podem ser vazios.", 0);
             return;
         }
-        if (dialog.getCategoria().length() > 50) {
-            criarWarningMessageBox("ERRO!!", "Categoria do produto não pode ter mais de 50 caracteres.", 0);
+        if (dialog.getQuantidade() < 0) {
+            criarWarningMessageBox("ERRO!!", "Quantidade do produto não pode ser negativa.", 0);
+            return;
+        }
+        if (dialog.getPreco() < 0) {
+            criarWarningMessageBox("ERRO!!", "Preço do produto não pode ser negativo.", 0);
             return;
         }
 
@@ -730,12 +738,12 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
 
         ListaParamAdicionalProduto* parametros = nullptr;
         for (int i = 0; i < dialog.getNumeroParametros(); i++) {
-            if (dialog.getNomeParametro(i).length() > 50) {
-                criarWarningMessageBox("ERRO!!", "Nome do parâmetro não pode ter mais de 50 caracteres.", 0);
+            if (dialog.getNomeParametro(i).length() > 50 || dialog.getValorParametro(i).length() > 50) {
+                criarWarningMessageBox("ERRO!!", "Nome e valor do parâmetro não podem ter mais de 50 caracteres.", 0);
                 return;
             }
-            if (dialog.getValorParametro(i).length() > 50) {
-                criarWarningMessageBox("ERRO!!", "Valor do parâmetro não pode ter mais de 50 caracteres.", 0);
+            if (dialog.getNomeParametro(i) == "" || dialog.getValorParametro(i) == "") {
+                criarWarningMessageBox("ERRO!!", "Nome e valor do parâmetro não podem ser vazios.", 0);
                 return;
             }
             std::string nomeParam = dialog.getNomeParametro(i).toStdString();
