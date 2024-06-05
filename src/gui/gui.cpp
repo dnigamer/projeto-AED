@@ -7,19 +7,17 @@ void startGui(int argc, char **argv, StockLoja *stockGeral) {
     QApplication app(argc, argv);
     MainMenu mainMenu;
 
-    // define o nome da janela
-    mainMenu.setWindowTitle("Gestão de Stock - " + QString(stockGeral->nome));
+    if (stockGeral->lista_linhas == nullptr) {
+        mainMenu.setWindowTitle("Gestão de Stock");
+        mainMenu.setStock(stockGeral);
+    } else {
+        mainMenu.setWindowTitle("Gestão de Stock - " + QString(stockGeral->nome));
+        mainMenu.setStock(stockGeral);
+        mainMenu.setLinhas(stockGeral);
+    }
 
-    // apresenta as linhas de produtos
-    mainMenu.setLinhas(stockGeral);
-
-    // apresenta o stock
-    mainMenu.setStock(stockGeral);
-
-    // atualiza as tabs
     mainMenu.reloadTabs();
-
-    // mostra a janela
     mainMenu.show();
+
     QApplication::exec();
 }

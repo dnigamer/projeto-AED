@@ -7,7 +7,15 @@
 
 #include "produtos.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int guardarStock(StockLoja* stock, const char* nome_arquivo);
 int carregarStock(StockLoja *stock, const char* nomeFicheiro);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif //PROJETO_STORAGE_H

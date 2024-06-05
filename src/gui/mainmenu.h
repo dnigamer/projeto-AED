@@ -8,9 +8,11 @@
 #include <QWidget>
 #include <QMainWindow>
 #include <QStandardItemModel>
-#include "../operacoes.h"
 #include "MenuDialog.h"
 #include "LinhaDialog.h"
+
+#include "../operacoes.h"
+#include "../storage.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainMenu; }
@@ -36,6 +38,8 @@ public slots:
     void onApagaLinhasStockBtnClicked();
     void onApagaProdutosStockBtnClicked();
 
+    void onProcuraBtnClicked();
+
 
 public:
     explicit MainMenu(QWidget *parent = nullptr);
@@ -49,16 +53,21 @@ public:
     void tabDefinicoes();
     void reloadTabs();
 
+    int criarWarningMessageBox(const QString &title, const QString &text, int mode);
+
     ~MainMenu() override;
 
 private:
     Ui::MainMenu *ui;
 
-    void open();
-    void save();
+    void openDB();
+    void saveDB();
+    void closeDB();
+    void newDB();
 
-    #ifdef Q_OS_MACOS
+#ifdef Q_OS_MACOS
     void createMacMenu();
+
     #endif
 
     void quit();

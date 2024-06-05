@@ -1,49 +1,109 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QStringListModel>
+#include <QFileDialog>
 #include "mainmenu.h"
 #include "ui_MainMenu.h"
 
 StockLoja *stock;
+int stockSaved = 0;
 int selLinha = 0, selProduto = 0, selModelo = 0;
 
-void MainMenu::open() {
-    statusBar()->showMessage("Ação abrir chamada");
+void MainMenu::newDB() {
+    int res = criarWarningMessageBox("Atenção", "Deseja criar uma nova base de dados?", 1);
+    if (res == QMessageBox::Yes) {
+        stock = criarStockLoja("");
+        setStock(stock);
+        reloadTabs();
+        ui->statusbar->showMessage("Nova base de dados criada com sucesso!");
+    }
 }
 
-void MainMenu::save() {
-    QMessageBox msgBox(QMessageBox::Warning, "Atenção", "As alterações não foram guardadas. Deseja guardar as alterações?", QMessageBox::Save | QMessageBox::No, this);
-    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-    statusBar()->showMessage((msgBox.exec() == QMessageBox::Save) ? "Save was clicked" : "No was clicked");
+void MainMenu::openDB() {
+    QString filename = QFileDialog::getOpenFileName(this, "Abrir base de dados", "", "JSON Files (*.json)");
+    if (filename.isEmpty()) return;
+
+    stock = criarStockLoja("");
+
+    int resultado = carregarStock(stock, filename.toStdString().c_str());
+    if (resultado == 1) {
+        criarWarningMessageBox("ERRO!!", "Erro ao abrir a base de dados.", 0);
+        return;
+    } else if (resultado == -1) {
+        criarWarningMessageBox("ERRO!!", "Não foi possivel ler a base de dados.", 0);
+        return;
+    }
+
+    setStock(stock);
+    reloadTabs();
+    ui->statusbar->showMessage("Base de dados aberta com sucesso!");
+}
+
+void MainMenu::saveDB() {
+    int res = criarWarningMessageBox("Atenção", "Deseja guardar as alterações?", 1);
+    if (res == QMessageBox::Yes) {
+        int resultado = guardarStock(stock, "stock.json");
+        if (resultado == 1) {
+            criarWarningMessageBox("ERRO!!", "Não foi possivel guardar a base de dados.", 0);
+            return;
+        }
+
+        stockSaved = 1;
+        statusBar()->showMessage("Stock guardado com sucesso!");
+    }
+}
+
+void MainMenu::closeDB() {
+    int res = criarWarningMessageBox("Atenção", "Deseja fechar a base de dados?", 1);
+    if (res == QMessageBox::Yes) {
+        stock = nullptr;
+        setWindowTitle("Gestão de Stock");
+        ui->nomeLojaLab->setText("Loja sem nome");
+        setLinhas(nullptr);
+        setProdutos(nullptr);
+        setModelos(nullptr);
+        setModeloInfo(nullptr);
+        reloadTabs();
+        ui->statusbar->showMessage("Base de dados fechada com sucesso!");
+    }
 }
 
 void MainMenu::quit() {
-    QMessageBox msgBox(QMessageBox::Warning, "Atenção", "Tem a certeza que deseja sair?",
-                        QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-    if (msgBox.exec() == QMessageBox::Yes) QMainWindow::close();
-    else statusBar()->showMessage("Não foi clicado");
+    int res = criarWarningMessageBox("Atenção", "Deseja sair da aplicação?", 1);
+    if (res == QMessageBox::Yes) {
+        if (stock && !stockSaved) {
+            int res2 = criarWarningMessageBox("Atenção", "Deseja guardar as alterações antes de sair?", 1);
+            if (res2 == QMessageBox::Yes) saveDB();
+        }
+        QApplication::quit();
+    }
 }
 
 MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) {
     ui->setupUi(this);
 
     QAction* actions[] = {
-        new QAction(tr("Abrir base de dados"), this),
-        new QAction(tr("Salvar para base de dados"), this),
-        new QAction(tr("Sair"), this)
+            new QAction(tr("Criar nova base de dados"), this),
+            new QAction(tr("Abrir base de dados"), this),
+            new QAction(tr("Salvar para base de dados"), this),
+            new QAction(tr("Fechar base de dados"), this),
+            new QAction(tr("Sair"), this)
     };
-    actions[0]->setShortcut(QKeySequence::Open);
-    actions[1]->setShortcut(QKeySequence::Save);
-    actions[2]->setShortcut(QKeySequence::Quit);
+    actions[0]->setShortcut(QKeySequence::New);
+    actions[1]->setShortcut(QKeySequence::Open);
+    actions[2]->setShortcut(QKeySequence::Save);
+    actions[3]->setShortcut(QKeySequence::Close);
+    actions[4]->setShortcut(QKeySequence::Quit);
 
-    connect(actions[0], &QAction::triggered, this, &MainMenu::open);
-    connect(actions[1], &QAction::triggered, this, &MainMenu::save);
-    connect(actions[2], &QAction::triggered, this, &MainMenu::quit);
+    connect(actions[0], &QAction::triggered, this, &MainMenu::newDB);
+    connect(actions[1], &QAction::triggered, this, &MainMenu::openDB);
+    connect(actions[2], &QAction::triggered, this, &MainMenu::saveDB);
+    connect(actions[3], &QAction::triggered, this, &MainMenu::closeDB);
+    connect(actions[4], &QAction::triggered, this, &MainMenu::quit);
 
-    ui->menuFicheiro->addActions({actions[0], actions[1]});
+    ui->menuFicheiro->addActions({actions[0], actions[1], actions[2], actions[3]});
     ui->menuFicheiro->addSeparator();
-    ui->menuFicheiro->addAction(actions[2]);
+    ui->menuFicheiro->addAction(actions[4]);
 
     auto listViews = {ui->linhasLV, ui->produtosLV, ui->modelosLV};
     for (auto lv : listViews) lv->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -62,7 +122,8 @@ MainMenu::MainMenu(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainMenu) 
         std::make_pair(ui->nomeLojaModBtn, &MainMenu::onNomeLojaModBtnClicked),
         std::make_pair(ui->atualizarStockInfoBtn, &MainMenu::onAtualizarStockInfoBtnClicked),
         std::make_pair(ui->apagaLinhasStockBtn, &MainMenu::onApagaLinhasStockBtnClicked),
-        std::make_pair(ui->apagaProdutosStockBtn, &MainMenu::onApagaProdutosStockBtnClicked)
+        std::make_pair(ui->apagaProdutosStockBtn, &MainMenu::onApagaProdutosStockBtnClicked),
+        std::make_pair(ui->procuraBtn, &MainMenu::onProcuraBtnClicked)
     };
     for (auto [button, slot] : buttons) connect(button, &QPushButton::clicked, this, slot);
 
@@ -85,13 +146,23 @@ MainMenu::~MainMenu() {
 }
 
 void MainMenu::setStock(StockLoja *ptr) {
-    if (!ptr) return;
     stock = ptr;
-    ui->nomeLojaLab->setText(ptr->nome);
+    if (strlen(stock->nome) == 0) {
+        ui->nomeLojaLab->setText("Loja sem nome");
+        return;
+    } else {
+        ui->nomeLojaLab->setText(stock->nome);
+    }
 }
 
 void MainMenu::setLinhas(StockLoja *ptr) {
-    if (!ptr) return;
+    if (!ptr) {
+        ui->linhasLV->setModel(nullptr);
+        setProdutos(nullptr);
+        setModelos(nullptr);
+        setModeloInfo(nullptr);
+        return;
+    }
 
     QStringList list;
     for (ListaLinhaProdutos *current = ptr->lista_linhas; current; current = current->prox_linha)
@@ -109,7 +180,8 @@ void MainMenu::setLinhas(StockLoja *ptr) {
 void MainMenu::setProdutos(LinhaProdutos *ptr) {
     if (ptr == nullptr) {
         ui->produtosLV->setModel(nullptr);
-        ui->modelosLV->setModel(nullptr);
+        setModelos(nullptr);
+        setModeloInfo(nullptr);
         return;
     }
 
@@ -141,6 +213,7 @@ void MainMenu::setProdutos(LinhaProdutos *ptr) {
 void MainMenu::setModelos(ListaProdutos *ptr) {
     if (!ptr) {
         ui->modelosLV->setModel(nullptr);
+        setModeloInfo(nullptr);
         return;
     }
 
@@ -179,15 +252,13 @@ void MainMenu::setModeloInfo(Produto *ptr) {
     ui->nomeModeloText->setText(fullNome);
     ui->quantModeloText->setText(QString::number(ptr->quantidade));
     ui->precoModeloText->setText(QString::number(ptr->preco).replace('.',',') + " €");
-
-    // Clear any existing items and set the row count
     ui->outrosParamTV->clearContents();
     ui->outrosParamTV->setRowCount(static_cast<int>(ptr->num_parametros));
     ui->outrosParamTV->setColumnCount(2);
     ui->outrosParamTV->setHorizontalHeaderLabels(QStringList() << "Nome" << "Valor");
 
     ListaParamAdicionalProduto* current = ptr->parametros;
-    int numparametros = static_cast<int>(ptr->num_parametros);
+    int numparametros = static_cast<int>(getNumeroParametrosAdicionais(current));
 
     for (int i = 0; i < numparametros; i++) {
         ParamAdicionalProduto param = *current->parametro;
@@ -198,6 +269,13 @@ void MainMenu::setModeloInfo(Produto *ptr) {
 }
 
 void MainMenu::tabDefinicoes() {
+    if (stock == nullptr) {
+        ui->nomeLojaModText->clear();
+        ui->numLinhasStockText->clear();
+        ui->numTiposStockText->clear();
+        ui->numProdutosStockText->clear();
+        return;
+    }
     ui->nomeLojaModText->setText(ui->nomeLojaLab->text());
     ui->numLinhasStockText->setText(QString::number(stock->num_linhas));
     ui->numTiposStockText->setText(QString::number(getNumeroTipoProdutosStock(stock)));
@@ -210,11 +288,12 @@ void MainMenu::reloadTabs() {
         setLinhas(stock);
         setProdutos(nullptr);
         setModelos(nullptr);
+        setModeloInfo(nullptr);
     } else if (ui->tabWidget->currentIndex() == 1) { // pesquisa
         ui->procuraTE->clear();
         ui->resultPesqTV->clear();
     } else if (ui->tabWidget->currentIndex() == 2) { // definições
-        MainMenu::tabDefinicoes();
+        tabDefinicoes();
     }
 }
 
@@ -273,21 +352,32 @@ void MainMenu::onAdicionarLinhaBtnClicked() {
         std::strcpy(nomeChar, nome.c_str());
 
         LinhaProdutos linha = criarLinhaProdutos(nomeChar);
-        adicionarLinhaProdutos(stock, linha);
+        int resultado = adicionarLinhaProdutos(stock, linha);
         delete[] nomeChar;
+
+        if (resultado == 2) { // linha já existe
+            criarWarningMessageBox("ERRO!!", "Linha de produtos já existe.", 0);
+            return;
+        } else if (resultado == 1) { // malloc problemas
+            criarWarningMessageBox("ERRO!!", "Problemas ao adicionar linha de produtos.", 0);
+            return;
+        } else if (resultado == -1) { // nome vazio
+            criarWarningMessageBox("ERRO!!", "Nome da linha não pode ser vazio.", 0);
+            return;
+        }
 
         setLinhas(stock);
         setProdutos(nullptr);
         setModelos(nullptr);
         setModeloInfo(nullptr);
-        ui->statusbar->showMessage("Linha de produtos adicionada com sucesso!");
+        ui->statusbar->showMessage("Sucesso - Linha de produtos adicionada com sucesso!");
     }
 }
 
 // Função para remover uma linha de produtos
 void MainMenu::onRemoverLinhaBtnClicked() {
     if (ui->linhasLV->currentIndex().row() == -1) {
-        ui->statusbar->showMessage("ERRO!! - Selecione uma linha de produtos para remover.");
+        criarWarningMessageBox("ERRO!!", "Selecione uma linha de produtos para remover.", 0);
         return;
     }
 
@@ -295,19 +385,22 @@ void MainMenu::onRemoverLinhaBtnClicked() {
     std::string nomeStd = nomeLinha.toStdString();
     char* nome = const_cast<char*>(nomeStd.c_str());
 
-    QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setText("Tem a certeza que deseja remover a linha de produtos \"" + nomeLinha + "\"?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-    int ret = msgBox.exec();
+    // procurar por linha se existe
+    LinhaProdutos *linha = obterLinhaProdutosPorNome(stock, nome);
+    if (linha == nullptr) {
+        criarWarningMessageBox("ERRO!!", "Linha de produtos não encontrada.", 0);
+        return;
+    }
+
+    int ret = criarWarningMessageBox("Confirmação", "Tem a certeza que deseja remover a linha de produtos \"" + nomeLinha + "\"?", 1);
     if (ret == QMessageBox::No) return;
 
-    LinhaProdutos *linha = obterLinhaProdutosPorNome(stock, nome);
     int resultado = removerLinhaProdutos(stock, linha->linhaID);
-    if (resultado == 1) {
-        ui->statusbar->showMessage("FATAL!! - Linha de produtos não encontrada!");
+    if (resultado == 2) {
+        criarWarningMessageBox("ERRO!!", "Linha de produtos não encontrada.", 0);
+        return;
+    } else if (resultado == 1) {
+        criarWarningMessageBox("ERRO!!", "Linha de produtos não foi removida porque o código da linha é inválido.", 0);
         return;
     }
 
@@ -321,7 +414,7 @@ void MainMenu::onRemoverLinhaBtnClicked() {
 // Função para atualizar uma linha de produtos
 void MainMenu::onAtualizarLinhaBtnClicked() {
     if (ui->linhasLV->currentIndex().row() == -1) {
-        ui->statusbar->showMessage("ERRO!! - Selecione uma linha de produtos para atualizar.");
+        criarWarningMessageBox("ERRO!!", "Selecione uma linha de produtos para atualizar.", 0);
         return;
     }
 
@@ -330,6 +423,11 @@ void MainMenu::onAtualizarLinhaBtnClicked() {
     char* nome = const_cast<char*>(nomeStd.c_str());
 
     LinhaProdutos *linha = obterLinhaProdutosPorNome(stock, nome);
+    if (linha == nullptr) {
+        criarWarningMessageBox("ERRO!!", "Linha de produtos não encontrada.", 0);
+        return;
+    }
+
     LinhaDialog dialog;
     dialog.setNomeJanela(1, nomeLinha);
     dialog.setID(QString::number(linha->linhaID));
@@ -347,7 +445,13 @@ void MainMenu::onAtualizarLinhaBtnClicked() {
 
         int resultado = atualizarLinhaProdutos(stock, &novaLinha);
         if (resultado == 1) {
-            ui->statusbar->showMessage("FATAL!! - Linha de produtos não encontrada!");
+            criarWarningMessageBox("ERRO!!", "Linha de produtos não foi encontrada.", 0);
+            return;
+        } else if (resultado == 2) {
+            criarWarningMessageBox("ERRO!!", "Linha de produtos não foi atualizada corretamente.", 0);
+            return;
+        } else if (resultado == -1) {
+            criarWarningMessageBox("ERRO!!", "Nome da linha de produtos não pode ser vazio.", 0);
             return;
         }
 
@@ -364,7 +468,7 @@ void MainMenu::onAtualizarLinhaBtnClicked() {
 void MainMenu::onAdicionarProdutoBtnClicked() {
     MenuDialog dialog;
     if (ui->linhasLV->currentIndex().row() == -1) {
-        ui->statusbar->showMessage("ERRO!! - Selecione uma linha de produtos para adicionar um produto.");
+        criarWarningMessageBox("ERRO!!", "Selecione uma linha de produtos para adicionar um produto.", 0);
         return;
     }
 
@@ -407,8 +511,31 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
         delete[] categoriaChar;
         delete[] modeloChar;
 
-        adicionarProduto(obterLinhaProdutosPorID(stock, selLinha + 1), &produto);
+        auto nomeQt = ui->linhasLV->model()->data(ui->linhasLV->currentIndex(), Qt::DisplayRole).toString();
+        std::string nomeLinhaStd = nomeQt.toStdString();
+        char* nomeLinha = const_cast<char*>(nomeLinhaStd.c_str());
+
+        int resultado = adicionarProduto(obterLinhaProdutosPorNome(stock, nomeLinha), &produto);
+        if (resultado == 1) {
+            criarWarningMessageBox("ERRO!!", "Ocorreu um problema ao adicionar o produto.", 0);
+            return;
+        } else if (resultado == 2) {
+            criarWarningMessageBox("ERRO!!", "A linha do produto não foi encontrada.", 0);
+            return;
+        } else if (resultado == 3) {
+            criarWarningMessageBox("ERRO!!", "O produto com este nome e modelo já existe.", 0);
+            return;
+        } else if (resultado == 4) {
+            criarWarningMessageBox("ERRO!!", "O nome do produto não pode ser vazio.", 0);
+            return;
+        } else if (resultado == 5) {
+            criarWarningMessageBox("ERRO!!", "O modelo do produto não pode ser vazio.", 0);
+            return;
+        }
+
         setProdutos(obterLinhaProdutosPorID(stock, selLinha + 1));
+        setModelos(obterListaProdutosPorIDLinha(stock, selLinha + 1));
+        setModeloInfo(nullptr);
 
         ui->statusbar->showMessage("Produto adicionado com sucesso!");
     }
@@ -416,15 +543,15 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
 
 void MainMenu::onRemoverProdutoBtnClicked() {
     if (ui->linhasLV->currentIndex().row() == -1) {
-        ui->statusbar->showMessage("ERRO!! - Selecione uma linha de produtos para remover um produto.");
+        criarWarningMessageBox("ERRO!!", "Selecione uma linha de produtos para remover um produto.", 0);
         return;
     }
     if (ui->produtosLV->currentIndex().row() == -1) {
-        ui->statusbar->showMessage("ERRO!! - Selecione um produto para remover um modelo.");
+        criarWarningMessageBox("ERRO!!", "Selecione um produto para remover um modelo.", 0);
         return;
     }
     if (ui->modelosLV->currentIndex().row() == -1) {
-        ui->statusbar->showMessage("ERRO!! - Selecione um modelo para remover.");
+        criarWarningMessageBox("ERRO!!", "Selecione um modelo para remover.", 0);
         return;
     }
 
@@ -434,47 +561,53 @@ void MainMenu::onRemoverProdutoBtnClicked() {
 
     QModelIndex indexProduto = ui->produtosLV->model()->index(selProduto, 0);
     auto itemProd = ui->produtosLV->model()->data(indexProduto, Qt::DisplayRole).toString();
-    auto modeloProd = ui->modelosLV->model()->data(ui->modelosLV->currentIndex(), Qt::DisplayRole).toString();
     std::string nomeStd = itemProd.toStdString();
+    auto modeloProd = ui->modelosLV->model()->data(ui->modelosLV->currentIndex(), Qt::DisplayRole).toString();
     std::string modeloStd = modeloProd.toStdString();
+
     char* nome = const_cast<char*>(nomeStd.c_str());
     char* modelo = const_cast<char*>(modeloStd.c_str());
 
     // open message box asking for confirmation
-    QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setText("Tem a certeza que deseja remover o produto?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-    int ret = msgBox.exec();
+    int ret = criarWarningMessageBox("Confirmação", "Tem a certeza que deseja remover o modelo \"" + itemProd + " " + modeloProd + "\"?", 1);
     if (ret == QMessageBox::No) return;
 
     LinhaProdutos *linha = obterLinhaProdutosPorNome(stock, nomeLinhaChar);
+    if (linha == nullptr) {
+        criarWarningMessageBox("ERRO!!", "Linha de produtos não encontrada.", 0);
+        return;
+    }
+
     Produto *produto = obterProdutoPorNome(linha, nome, modelo);
+    if (produto == nullptr) {
+        criarWarningMessageBox("ERRO!!", "Produto não encontrado.", 0);
+        return;
+    }
+
     int resultado = removerProduto(linha, produto->produtoID);
-    if (resultado == 0) {
-        ui->statusbar->showMessage("FATAL!! - Produto não encontrado!");
+    if (resultado == 1) {
+        criarWarningMessageBox("ERRO!!", "Ocorreu um problema ao eliminar o produto!", 0);
         return;
     }
 
     setProdutos(obterLinhaProdutosPorNome(stock, nomeLinhaChar));
-    setModelos(nullptr);
+    setModelos(obterListaProdutosPorIDLinha(stock, selLinha + 1));
     setModeloInfo(nullptr);
+
     ui->statusbar->showMessage("Produto removido com sucesso!");
 }
 
 void MainMenu::onAtualizarProdutoBtnClicked() {
     if (ui->linhasLV->currentIndex().row() == -1) {
-        ui->statusbar->showMessage("ERRO!! - Selecione uma linha de produtos para atualizar um produto.");
+        criarWarningMessageBox("ERRO!!", "Selecione uma linha de produtos para atualizar um produto.", 0);
         return;
     }
     if (ui->produtosLV->currentIndex().row() == -1) {
-        ui->statusbar->showMessage("ERRO!! - Selecione um produto para atualizar um modelo.");
+        criarWarningMessageBox("ERRO!!", "Selecione um produto para atualizar um modelo.", 0);
         return;
     }
     if (ui->modelosLV->currentIndex().row() == -1) {
-        ui->statusbar->showMessage("ERRO!! - Selecione um modelo para atualizar.");
+        criarWarningMessageBox("ERRO!!", "Selecione um modelo para atualizar.", 0);
         return;
     }
 
@@ -534,7 +667,15 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
             std::strcpy(valorParamChar, valorParam.c_str());
 
             ParamAdicionalProduto* parametro = criarParametroAdicionalProduto(nomeParamChar, valorParamChar);
-            adicionarParametroAdicionalLista(&parametros, parametro);
+            if (parametro == nullptr) {
+                criarWarningMessageBox("ERRO!!", "Erro ao criar parâmetro adicional.", 0);
+                return;
+            }
+            int resultado = adicionarParametroAdicionalLista(&parametros, parametro);
+            if (resultado == 1) {
+                criarWarningMessageBox("ERRO!!", "Erro ao adicionar parâmetro adicional à lista. Verifique se preencheu todos os campos.", 0);
+                return;
+            }
 
             delete[] nomeParamChar;
             delete[] valorParamChar;
@@ -542,7 +683,6 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
 
         Produto novoProduto = criarProduto(nomeChar, categoriaChar, modeloChar, dialog.getQuantidade(), dialog.getPreco(), parametros);
         novoProduto.linhaID = produto->linhaID;
-        novoProduto.listaID = produto->listaID;
         novoProduto.produtoID = produto->produtoID;
 
         delete[] nomeChar;
@@ -550,14 +690,19 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
         delete[] modeloChar;
 
         LinhaProdutos *linha = obterLinhaProdutosPorNome(stock, nomeLinhaChar);
+        if (linha == nullptr) {
+            criarWarningMessageBox("ERRO!!", "Linha de produtos não encontrada.", 0);
+            return;
+        }
+
         int resultado = atualizarProduto(linha, &novoProduto);
         if (resultado == 1) {
-            ui->statusbar->showMessage("FATAL!! - Produto não encontrado!");
+            criarWarningMessageBox("ERRO!!", "Produto não encontrado.", 0);
             return;
         }
 
         setProdutos(obterLinhaProdutosPorNome(stock, nomeLinhaChar));
-        setModelos(nullptr);
+        setModelos(obterListaProdutosPorIDLinha(stock, selLinha + 1));
         setModeloInfo(nullptr);
         ui->statusbar->showMessage("Produto atualizado com sucesso!");
     }
@@ -614,9 +759,168 @@ void MainMenu::onApagaProdutosStockBtnClicked() {
     ui->statusbar->showMessage("Produtos de stock apagados. Linhas foram mantidas.");
 }
 
+void MainMenu::onProcuraBtnClicked() {
+    QString procura = ui->procuraTE->text();
+    if (procura.isEmpty()) {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Erro! Campo de pesquisa vazio.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+        msgBox.exec();
+        return;
+    }
+
+    int choice = ui->catPesqDD->currentIndex();
+    // 1-codigo, 2-nome, 3-modelo, 4-categoria, 5-parametros, 6-lista
+    switch (choice) {
+        case 0: {
+            // separate the line and product ID
+            QStringList parts = procura.split(".");
+            if (parts.size() != 2) {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Erro! Formato de pesquisa inválido.");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+                msgBox.exec();
+                return;
+            }
+
+            LinhaProdutos *linha = obterLinhaProdutosPorID(stock, parts[0].toInt());
+            if (linha == nullptr) {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Linha de produtos não encontrada.");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+                msgBox.exec();
+                return;
+            }
+
+            Produto *produto = obterProdutoPorID(linha, parts[1].toInt());
+            if (produto == nullptr) {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Produto não encontrado.");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+                msgBox.exec();
+                return;
+            }
+            // fill the table widget with the product info
+            ui->resultPesqTV->setRowCount(1);
+            ui->resultPesqTV->setColumnCount(6);
+            ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço");
+            ui->resultPesqTV->setItem(0, 0, new QTableWidgetItem(QString::number(produto->linhaID)));
+            ui->resultPesqTV->setItem(0, 1, new QTableWidgetItem(QString::fromStdString(produto->nome)));
+            ui->resultPesqTV->setItem(0, 2, new QTableWidgetItem(QString::fromStdString(produto->modelo)));
+            ui->resultPesqTV->setItem(0, 3, new QTableWidgetItem(QString::fromStdString(produto->item)));
+            ui->resultPesqTV->setItem(0, 4, new QTableWidgetItem(QString::number(produto->quantidade)));
+            ui->resultPesqTV->setItem(0, 5, new QTableWidgetItem(QString::number(produto->preco).replace('.',',') + " €"));
+            break;
+        }
+        case 1: {
+            char* nome = const_cast<char *>(procura.toStdString().c_str());
+
+            ListaProdutos *listaDoProduto = procurarStockPorNomeProduto(stock, nome);
+            if (listaDoProduto == nullptr) {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Produto não encontrado.");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+                msgBox.exec();
+                return;
+            }
+
+            //setModeloInfo(produto);
+            break;
+        }
+        case 2: {
+            /*Produto *produto = procurarProdutoPorModelo(stock, procura.toStdString().c_str());
+            if (produto == nullptr) {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Produto não encontrado.");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+                msgBox.exec();
+                return;
+            }
+            setModeloInfo(produto);*/
+            break;
+        }
+        case 3: {
+            /*Produto *produto = procurarProdutoPorCategoria(stock, procura.toStdString().c_str());
+            if (produto == nullptr) {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Produto não encontrado.");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+                msgBox.exec();
+                return;
+            }
+            setModeloInfo(produto);*/
+            break;
+        }
+        case 4: {
+            /*Produto *produto = procurarProdutoPorParametro(stock, procura.toStdString().c_str());
+            if (produto == nullptr) {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Produto não encontrado.");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+                msgBox.exec();
+                return;
+            }
+            setModeloInfo(produto);*/
+            break;
+        }
+        case 5: {
+            /*LinhaProdutos *linha = procurarStockPorNomeProduto(stock, procura.toStdString().c_str());
+            if (linha == nullptr) {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Produto não encontrado.");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+                msgBox.exec();
+                return;
+            }
+            setProdutos(linha);
+            setModelos(nullptr);
+            setModeloInfo(nullptr);*/
+            break;
+        }
+        default:
+            break;
+
+    }
+    ui->statusbar->showMessage("Produto encontrado com sucesso!");
+
+}
+
 // Processamento de mudança de tab
 void MainMenu::onTabChanged(int index) {
     reloadTabs();
+}
+
+int MainMenu::criarWarningMessageBox(const QString &title, const QString &text, int mode) {
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setWindowTitle(title);
+    msgBox.setText(text);
+    if (mode == 1) {
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+    } else {
+        msgBox.setStandardButtons(QMessageBox::Ok);
+    }
+    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
+    return msgBox.exec();
 }
 
 #ifdef Q_OS_MACOS

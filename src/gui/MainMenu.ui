@@ -506,12 +506,7 @@
       </item>
       <item>
        <property name="text">
-        <string>Produto</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Lista</string>
+        <string>Nome</string>
        </property>
       </item>
       <item>
@@ -521,7 +516,17 @@
       </item>
       <item>
        <property name="text">
+        <string>Categoria</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>Parâmetro</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Lista</string>
        </property>
       </item>
      </widget>

@@ -14,13 +14,13 @@ extern "C" {
 // Funções para manipulação de stock
 
 // cria instância de stock
-StockLoja criarStockLoja(char* nome);
+StockLoja* criarStockLoja(char* nome);
 // edita o nome da loja (somente)
 int editarStockLoja(StockLoja* stockLoja, const char* nome);
 // apaga todas as linhas de produtos do stock
-void apagarLinhasProdutos(StockLoja* stockLoja);
+int apagarLinhasProdutos(StockLoja* stockLoja);
 // apaga todos os produtos e todas as linhas de produtos do stock
-void apagarProdutosLinhasStock(StockLoja* stockLoja);
+int apagarProdutosLinhasStock(StockLoja* stockLoja);
 
 
 // Funções para manipulação de Linhas de Produtos (mais geral)
@@ -43,23 +43,6 @@ int atualizarLinhaProdutos(StockLoja* stockLoja, LinhaProdutos* linha);
 // Funções sobre Listas de Produtos (listas onde inclui somente os produtos
 // Lista ligada
 
-// cria uma instância de uma Lista de Produtos
-ListaProdutos* criarListaProdutos();
-// adiciona um produto a uma Lista de Produtos
-int adicionarProdutoListaProdutos(ListaProdutos* lista, Produto* produto);
-// remove um produto de uma Lista de Produtos
-int removerProdutoListaProdutos(ListaProdutos* lista, unsigned int codigoProduto);
-// procura por um produto numa Lista de Produtos por ID
-Produto* obterProdutoListaProdutosPorID(ListaProdutos* lista, unsigned int codigoProduto);
-// procura por um produto numa Lista de Produtos por nome
-Produto* obterProdutoListaProdutosPorNome(ListaProdutos* lista, char* nomeProduto);
-// atualiza um produto numa Lista de Produtos
-int atualizarProdutoListaProdutos(ListaProdutos* lista, Produto* produto);
-// obtem o número de produtos numa Lista de Produtos
-unsigned int getNumeroProdutosListaProdutos(ListaProdutos* lista);
-
-// obtem a Lista de Produtos inteira baseada no ID de um produto nessa lista
-ListaProdutos* obterListaProdutosPorIDProduto(StockLoja* stock, int codLista);
 // obtem a Lista de Produtos inteira baseada no ID da linha em que está incluida essa lista
 ListaProdutos* obterListaProdutosPorIDLinha(StockLoja* stock, int codLinha);
 // obtem a Lista de Produtos inteira baseada no nome da linha em que está incluida essa lista
@@ -94,9 +77,9 @@ ListaParamAdicionalProduto* criarListaParamAdicionaisProduto();
 ParamAdicionalProduto* criarParametroAdicionalProduto(char* nome, char* valor);
 // adiciona um parâmetro adicional a uma lista de parâmetros adicionais de produtos
 int adicionarParametroAdicionalProduto(Produto* produto, ParamAdicionalProduto* parametro);
-// remove um parâmetro adicional de uma lista de parâmetros adicionais de produtos
+// N/U remove um parâmetro adicional de uma lista de parâmetros adicionais de produtos
 int removerParametroAdicionalProduto(Produto* produto, unsigned int codigoParametro);
-// procura por um parâmetro adicional numa lista de parâmetros adicionais de produtos por ID
+// N/U procura por um parâmetro adicional numa lista de parâmetros adicionais de produtos por ID
 int atualizarParametroAdicional(Produto* produto, ParamAdicionalProduto* parametro);
 // adiciona um parametro adicional a uma lista de parametros adicionais de produtos
 int adicionarParametroAdicionalLista(ListaParamAdicionalProduto** lista, ParamAdicionalProduto* parametro);
@@ -112,8 +95,6 @@ unsigned int getNumeroParametrosAdicionais(ListaParamAdicionalProduto* lista);
 
 // obtem o número de linhas de produtos no stock
 unsigned int getNumeroLinhasProdutos(StockLoja* stockLoja);
-// obtem o número de produtos no stock
-unsigned int getNumeroLinhasStock(StockLoja* stock);
 // obtem o número de produtos numa linha de produtos
 unsigned int getNumeroProdutosLinha(LinhaProdutos* linha);
 // obtem o número de produtos no stock

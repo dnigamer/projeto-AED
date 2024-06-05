@@ -1,6 +1,7 @@
 //
 // Created by Gonçalo Miranda on 03/06/2024.
 //
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -18,7 +19,7 @@ int guardarStock(StockLoja* stock, const char* nome_arquivo) {
     FILE* arquivo = fopen(nome_arquivo, "w");
     if (arquivo == NULL) {
         printf("Não foi possível abrir o arquivo %s\n", nome_arquivo);
-        return 0;
+        return 1;
     }
 
     fprintf(arquivo, "{\n");
@@ -49,7 +50,6 @@ int guardarStock(StockLoja* stock, const char* nome_arquivo) {
 
                 fprintf(arquivo, "        {\n");
                 fprintf(arquivo, "          \"linhaID\": %u,\n", linha->linhaID);
-                fprintf(arquivo, "          \"listaID\": %u,\n", produto->listaID);
                 fprintf(arquivo, "          \"produtoID\": %u,\n", produto->produtoID);
                 fprintf(arquivo, "          \"nome\": \"%s\",\n", produto->nome);
                 fprintf(arquivo, "          \"item\": \"%s\",\n", produto->item);
@@ -106,7 +106,7 @@ int guardarStock(StockLoja* stock, const char* nome_arquivo) {
     fprintf(arquivo, "}\n");
 
     fclose(arquivo);
-    return 1;
+    return 0;
 }
 
 void removeNewlineJSON(const char* nome_arquivo) {
@@ -144,7 +144,7 @@ int carregarStock(StockLoja* stock, const char* nome_arquivo) {
     FILE* arquivo = fopen(nome_arquivo, "r");
     if (arquivo == NULL) {
         printf("O arquivo %s não existe\n", nome_arquivo);
-        return 0;
+        return 1;
     }
 
     removeNewlineJSON(nome_arquivo);
@@ -152,7 +152,7 @@ int carregarStock(StockLoja* stock, const char* nome_arquivo) {
     char* json = read_file(nome_arquivo);
     if (json == NULL) {
         printf("Não foi possível ler o arquivo %s\n", nome_arquivo);
-        return 0;
+        return -1;
     }
 
     cJSON* root = cJSON_Parse(json);
@@ -163,7 +163,7 @@ int carregarStock(StockLoja* stock, const char* nome_arquivo) {
             printf("Erro antes de: %s\n", error_ptr);
         }
         free(json);
-        return 0;
+        return -1;
     }
 
     cJSON* nome = cJSON_GetObjectItem(root, "nome");
@@ -186,7 +186,7 @@ int carregarStock(StockLoja* stock, const char* nome_arquivo) {
     cJSON_Delete(root);
     free(json);
 
-    return 1;
+    return 0;
 }
 
 static char* read_file(const char* filename) {
@@ -265,7 +265,6 @@ static void parse_produtos(LinhaProdutos* linha, cJSON* produtos_json) {
         last_prod = prod_node;
 
         cJSON* linhaID = cJSON_GetObjectItem(prod_json, "linhaID");
-        cJSON* listaID = cJSON_GetObjectItem(prod_json, "listaID");
         cJSON* produtoID = cJSON_GetObjectItem(prod_json, "produtoID");
         cJSON* nome = cJSON_GetObjectItem(prod_json, "nome");
         cJSON* item = cJSON_GetObjectItem(prod_json, "item");
@@ -277,9 +276,6 @@ static void parse_produtos(LinhaProdutos* linha, cJSON* produtos_json) {
 
         if (cJSON_IsNumber(linhaID)) {
             produto->linhaID = linhaID->valueint;
-        }
-        if (cJSON_IsNumber(listaID)) {
-            produto->listaID = listaID->valueint;
         }
         if (cJSON_IsNumber(produtoID)) {
             produto->produtoID = produtoID->valueint;

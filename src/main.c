@@ -13,8 +13,9 @@
 
 int main(int argc, char *argv[])
 {
+    /*
     // Define uma instância de stock
-    /*StockLoja stockGeral = { "Mercado do bolhão", 0, NULL};
+    StockLoja stockGeral = { "Mercado do bolhão", 0, NULL};
 
     // cria uma linha de produtos e adiciona ao stock
     LinhaProdutos linhatemp;
@@ -49,16 +50,14 @@ int main(int argc, char *argv[])
     // chama a função para iniciar a GUI
     //startGui(argc, argv, &stockGeral);
     guardarStock(&stockGeral, "stock.json");
-    printf("Stock guardado\n");*/
+    printf("Stock guardado\n");
+    */
 
-    StockLoja stock2 = criarStockLoja("");
-    carregarStock(&stock2, "stock.json");
-    //startGui(argc, argv, &stock2);
+    StockLoja stock2 = *criarStockLoja("");
+    startGui(argc, argv, &stock2);
 
     // chama a função para iniciar a CLI
-    startCLI(&stock2);
-    guardarStock(&stock2, "stock.json");
-    printf("Stock guardado\n");
+    //startCLI(&stock2);
 
     return 0;
 }

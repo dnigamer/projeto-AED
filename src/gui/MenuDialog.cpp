@@ -105,8 +105,14 @@ int MenuDialog::getQuantidade() {
 }
 
 float MenuDialog::getPreco() {
-    ui->precoText->text().remove(" €");
-    return ui->precoText->text().toFloat();
+    QString priceString = ui->precoText->text().remove(" €");
+    bool ok;
+    float price = priceString.toFloat(&ok);
+    if (ok) {
+        return price;
+    } else {
+        return 0.0f;
+    }
 }
 
 QString MenuDialog::getParametros() {
@@ -126,7 +132,7 @@ QString MenuDialog::getNomeParametro(int index) {
 }
 
 QString MenuDialog::getValorParametro(int index) {
-    return ui->tabParam->item(index, 0)->text();
+    return ui->tabParam->item(index, 1)->text();
 }
 
 MenuDialog::~MenuDialog() {

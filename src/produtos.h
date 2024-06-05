@@ -25,11 +25,10 @@ typedef struct ListaParamAdicionalProduto {
 // definição de struct de produto
 typedef struct {
     unsigned int linhaID;
-    unsigned int listaID;
     unsigned int produtoID;
     char nome[MAX_CHAR];
-    char item[MAX_CHAR];
     char modelo[MAX_CHAR];
+    char item[MAX_CHAR];
     unsigned int quantidade;
     double preco;
     unsigned int num_parametros;
