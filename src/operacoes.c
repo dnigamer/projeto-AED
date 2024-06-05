@@ -8,7 +8,8 @@
 
 // Cria uma nova instância de stock da loja
 // Retorna o stock da loja
-StockLoja* criarStockLoja(char* nome) {
+StockLoja* criarStockLoja(char* nome, int empty) {
+    if (empty == 1) nome = "";
     StockLoja *stock = (StockLoja*) malloc(sizeof(StockLoja)); // alocar memória para o stock
     if (stock == NULL) return NULL; // se houver problema com a alocação de memória, retornar NULL
     strncpy(stock->nome, nome, 20); // copiar o nome para o stock

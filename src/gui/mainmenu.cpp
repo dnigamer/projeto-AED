@@ -10,8 +10,9 @@ int stockSaved = 0;
 int selLinha = 0, selProduto = 0, selModelo = 0;
 
 void MainMenu::newDB() {
-    char *stockName = new char[1];
-    stock = criarStockLoja(stockName);
+    char *stockName = static_cast<char *>(malloc(1));
+    stock = criarStockLoja(stockName, 1);
+
     setStock(stock);
     reloadTabs();
     ui->statusbar->showMessage("Nova base de dados criada com sucesso!");
@@ -21,8 +22,8 @@ void MainMenu::openDB() {
     QString filename = QFileDialog::getOpenFileName(this, "Abrir base de dados", "", "JSON Files (*.json)");
     if (filename.isEmpty()) return;
 
-    char *stockName = new char[1];
-    stock = criarStockLoja(stockName);
+    char *stockName = static_cast<char *>(malloc(1));
+    stock = criarStockLoja(stockName, 1);
 
     int resultado = carregarStock(stock, filename.toStdString().c_str());
     if (resultado == 1) {
@@ -43,7 +44,10 @@ void MainMenu::openDB() {
 void MainMenu::saveDB() {
     int res = criarWarningMessageBox("Atenção", "Deseja guardar as alterações?", 1);
     if (res == QMessageBox::Yes) {
-        int resultado = guardarStock(stock, "stock.json");
+        QString filename = QFileDialog::getSaveFileName(this, "Guardar base de dados", "", "JSON Files (*.json)");
+        if (filename.isEmpty()) return;
+
+        int resultado = guardarStock(stock, filename.toStdString().c_str());
         if (resultado == 1) {
             criarWarningMessageBox("ERRO!!", "Não foi possivel guardar a base de dados.", 0);
             return;
@@ -364,6 +368,12 @@ void MainMenu::onAdicionarLinhaBtnClicked() {
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted) {
+        // check for all strings length < 50
+        if (dialog.getNome().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Nome da linha de produtos não pode ter mais de 50 caracteres.", 0);
+            return;
+        }
+
         std::string nome = dialog.getNome().toStdString();
         char* nomeChar = new char[nome.length() + 1];
         std::strcpy(nomeChar, nome.c_str());
@@ -453,6 +463,11 @@ void MainMenu::onAtualizarLinhaBtnClicked() {
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted) {
+        if (dialog.getNome().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Nome da linha de produtos não pode ter mais de 50 caracteres.", 0);
+            return;
+        }
+
         std::string novoNome = dialog.getNome().toStdString();
         char* novoNomeChar = new char[novoNome.length() + 1];
         std::strcpy(novoNomeChar, novoNome.c_str());
@@ -494,6 +509,19 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted) {
+        if (dialog.getNome().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Nome do produto não pode ter mais de 50 caracteres.", 0);
+            return;
+        }
+        if (dialog.getModelo().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Modelo do produto não pode ter mais de 50 caracteres.", 0);
+            return;
+        }
+        if (dialog.getCategoria().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Categoria do produto não pode ter mais de 50 caracteres.", 0);
+            return;
+        }
+
         std::string nome = dialog.getNome().toStdString();
         std::string categoria = dialog.getCategoria().toStdString();
         std::string modelo = dialog.getModelo().toStdString();
@@ -507,6 +535,14 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
 
         ListaParamAdicionalProduto* parametros = nullptr;
         for (int i = 0; i < dialog.getNumeroParametros(); i++) {
+            if (dialog.getNomeParametro(i).length() > 50) {
+                criarWarningMessageBox("ERRO!!", "Nome do parâmetro não pode ter mais de 50 caracteres.", 0);
+                return;
+            }
+            if (dialog.getValorParametro(i).length() > 50) {
+                criarWarningMessageBox("ERRO!!", "Valor do parâmetro não pode ter mais de 50 caracteres.", 0);
+                return;
+            }
             std::string nomeParam = dialog.getNomeParametro(i).toStdString();
             std::string valorParam = dialog.getValorParametro(i).toStdString();
 
@@ -664,6 +700,19 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted) {
+        if (dialog.getNome().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Nome do produto não pode ter mais de 50 caracteres.", 0);
+            return;
+        }
+        if (dialog.getModelo().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Modelo do produto não pode ter mais de 50 caracteres.", 0);
+            return;
+        }
+        if (dialog.getCategoria().length() > 50) {
+            criarWarningMessageBox("ERRO!!", "Categoria do produto não pode ter mais de 50 caracteres.", 0);
+            return;
+        }
+
         std::string novoNome = dialog.getNome().toStdString();
         std::string categoria = dialog.getCategoria().toStdString();
         std::string novoModelo = dialog.getModelo().toStdString();
@@ -677,6 +726,14 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
 
         ListaParamAdicionalProduto* parametros = nullptr;
         for (int i = 0; i < dialog.getNumeroParametros(); i++) {
+            if (dialog.getNomeParametro(i).length() > 50) {
+                criarWarningMessageBox("ERRO!!", "Nome do parâmetro não pode ter mais de 50 caracteres.", 0);
+                return;
+            }
+            if (dialog.getValorParametro(i).length() > 50) {
+                criarWarningMessageBox("ERRO!!", "Valor do parâmetro não pode ter mais de 50 caracteres.", 0);
+                return;
+            }
             std::string nomeParam = dialog.getNomeParametro(i).toStdString();
             std::string valorParam = dialog.getValorParametro(i).toStdString();
 
@@ -738,6 +795,19 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
 /// TAB DEFINIÇÕES
 // Função para alterar o nome da loja
 void MainMenu::onNomeLojaModBtnClicked() {
+    if (ui->nomeLojaModText->text().isEmpty()) {
+        criarWarningMessageBox("ERRO!!", "Campo de texto vazio.", 0);
+        return;
+    }
+    if (stock == nullptr) {
+        criarWarningMessageBox("ERRO!!", "Stock não inicializado.", 0);
+        return;
+    }
+    if (ui->nomeLojaModText->text().length() > 50) {
+        criarWarningMessageBox("ERRO!!", "Nome da loja não pode ter mais de 50 caracteres.", 0);
+        return;
+    }
+
     QString newName = ui->nomeLojaModText->text();
     if (newName.isEmpty()) return;
     int resultado = editarStockLoja(stock, newName.toStdString().c_str());
@@ -745,6 +815,7 @@ void MainMenu::onNomeLojaModBtnClicked() {
         ui->statusbar->showMessage("ERRO!! - Erro ao alterar o nome da loja");
         return;
     }
+
     ui->nomeLojaLab->setText(newName);
     ui->nomeLojaModText->clear();
     window()->setWindowTitle("Gestão de Stock - " + newName);
@@ -758,6 +829,11 @@ void MainMenu::onAtualizarStockInfoBtnClicked() {
 
 // Função para apagar todas as linhas de produtos do stock
 void MainMenu::onApagaLinhasStockBtnClicked() {
+    if (stock == nullptr) {
+        criarWarningMessageBox("ERRO!!", "Stock não inicializado.", 0);
+        return;
+    }
+
     int ret = criarWarningMessageBox("Confirmação", "Tem a certeza que deseja apagar todas as linhas de stock?", 1);
     if (ret == QMessageBox::No) return;
     apagarLinhasProdutos(stock);
@@ -767,6 +843,11 @@ void MainMenu::onApagaLinhasStockBtnClicked() {
 
 // Função para apagar todos os produtos do stock
 void MainMenu::onApagaProdutosStockBtnClicked() {
+    if (stock == nullptr) {
+        criarWarningMessageBox("ERRO!!", "Stock não inicializado.", 0);
+        return;
+    }
+
     int ret = criarWarningMessageBox("Confirmação", "Tem a certeza que deseja apagar todos os produtos do stock? Linhas serão mantidas.", 1);
     if (ret == QMessageBox::No) return;
     apagarProdutosLinhasStock(stock);
@@ -875,7 +956,7 @@ void MainMenu::onProcuraBtnClicked() {
             int i = 0;
             for (ListaProdutos *current = lista; current; current = current->prox_produto) {
                 Produto produto = *current->produto;
-                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, produto.linhaID);
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, (int) produto.linhaID);
                 ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
                 ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
                 ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));
@@ -913,7 +994,7 @@ void MainMenu::onProcuraBtnClicked() {
             int i = 0;
             for (ListaProdutos *current = lista; current; current = current->prox_produto) {
                 Produto produto = *current->produto;
-                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, produto.linhaID);
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, (int) produto.linhaID);
                 ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
                 ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
                 ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));
@@ -951,7 +1032,7 @@ void MainMenu::onProcuraBtnClicked() {
             int i = 0;
             for (ListaProdutos *current = lista; current; current = current->prox_produto) {
                 Produto produto = *current->produto;
-                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, produto.linhaID);
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, (int) produto.linhaID);
                 ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
                 ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
                 ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));
@@ -989,7 +1070,7 @@ void MainMenu::onProcuraBtnClicked() {
             int i = 0;
             for (ListaProdutos *current = lista; current; current = current->prox_produto) {
                 Produto produto = *current->produto;
-                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, produto.linhaID);
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, (int) produto.linhaID);
                 ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
                 ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
                 ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));

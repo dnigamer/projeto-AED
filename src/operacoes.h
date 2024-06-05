@@ -14,7 +14,7 @@ extern "C" {
 // Funções para manipulação de stock
 
 // cria instância de stock
-StockLoja* criarStockLoja(char* nome);
+StockLoja* criarStockLoja(char* nome, int empty);
 // edita o nome da loja (somente)
 int editarStockLoja(StockLoja* stockLoja, const char* nome);
 // apaga todas as linhas de produtos do stock

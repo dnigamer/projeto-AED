@@ -58,7 +58,7 @@ typedef struct ListaLinhaProdutos {
 
 // definição de struct de stock para a loja
 typedef struct {
-    char nome[20];
+    char nome[30];
     unsigned int num_linhas;
     ListaLinhaProdutos* lista_linhas;
 } StockLoja;

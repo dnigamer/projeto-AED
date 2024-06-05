@@ -39,10 +39,6 @@ add_executable(Projeto src/main.c
         src/gui/LinhaDialog.cpp
         src/gui/LinhaDialog.h
         src/gui/LinhaDialog.ui
-        src/cli/cli.c
-        src/cli/cli.h
-        src/cli/ioutil.c
-        src/cli/ioutil.h
         src/storage.c
         src/storage.h
         src/cJSON.c
