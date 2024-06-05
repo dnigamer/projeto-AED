@@ -552,6 +552,10 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
             std::strcpy(valorParamChar, valorParam.c_str());
 
             ParamAdicionalProduto* parametro = criarParametroAdicionalProduto(nomeParamChar, valorParamChar);
+            if (parametro == nullptr) {
+                criarWarningMessageBox("ERRO!!", "Problemas ao adicionar parâmetro adicional! Verifique por valores em falta.", 0);
+                return;
+            }
             adicionarParametroAdicionalLista(&parametros, parametro);
 
             delete[] nomeParamChar;

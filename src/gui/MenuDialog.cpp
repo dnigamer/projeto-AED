@@ -128,10 +128,22 @@ unsigned int MenuDialog::getNumeroParametros() {
 }
 
 QString MenuDialog::getNomeParametro(int index) {
+    if (index < 0 || index >= ui->tabParam->rowCount()) {
+        return "";
+    }
+    if (ui->tabParam->item(index, 0) == nullptr) {
+        return "";
+    }
     return ui->tabParam->item(index, 0)->text();
 }
 
 QString MenuDialog::getValorParametro(int index) {
+    if (index < 0 || index >= ui->tabParam->rowCount()) {
+        return "";
+    }
+    if (ui->tabParam->item(index, 1) == nullptr) {
+        return "";
+    }
     return ui->tabParam->item(index, 1)->text();
 }
 
