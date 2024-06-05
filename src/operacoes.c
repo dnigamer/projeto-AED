@@ -261,6 +261,31 @@ ListaProdutos* procurarStockPorNomeProduto(StockLoja* stock, char* nomeItem) {
     return produtos; // retornar a lista de produtos
 }
 
+ListaProdutos* obterListaProdutosPorItemLinha(LinhaProdutos* linha, char* nomeItem) {
+    if (linha == NULL) return NULL; // se a linha não for encontrada, retornar NULL
+    if (linha->lista_produtos == NULL) return NULL; // se não houver produtos, retornar NULL
+    if (strlen(nomeItem) == 0) return NULL; // se o nome for vazio, retornar NULL
+
+    ListaProdutos* current = linha->lista_produtos; // pegar no primeiro produto
+    ListaProdutos* produtos = NULL; // inicializar a lista de produtos a NULL
+
+    if (current == NULL) return NULL; // se não houver produtos na linha, retornar NULL
+
+    while (current != NULL) { // enquanto houver produtos
+        if (strcmp(current->produto->nome, nomeItem) == 0) { // se o nome do item for igual ao nome fornecido
+            ListaProdutos* newProduto = (ListaProdutos*) malloc(sizeof(ListaProdutos)); // alocar memória para o novo produto
+            if (newProduto == NULL) return NULL; // se houver problema com a alocação de memória, retornar NULL
+            newProduto->produto = current->produto; // copiar o produto para a lista a retornar
+            newProduto->prox_produto = produtos; // apontar para a lista de produtos atual
+            produtos = newProduto; // apontar para o novo produto
+        }
+        current = current->prox_produto; // avançar para o próximo produto
+    }
+
+    return produtos; // retornar a lista de produtos
+}
+
+
 // Cria um novo produto usando os parâmetros fornecidos
 // Retorna instância de produto
 Produto criarProduto(char* nome, char* item, char* modelo, unsigned int quantidade, double preco, ListaParamAdicionalProduto* parametros) {
@@ -376,6 +401,8 @@ int removerProduto(LinhaProdutos* linha, unsigned int IDproduto) {
         prev->prox_produto = temp->prox_produto; // apontar para o próximo produto se não for o primeiro
     }
 
+    linha->num_produtos--; // decrementar o número de produtos
+
     free(temp); // libertar o produto
     return 0;
 }
@@ -394,22 +421,8 @@ int atualizarProduto(LinhaProdutos* linha, Produto* produto) {
             strncpy(current->produto->modelo, produto->modelo, sizeof(current->produto->modelo));
             current->produto->quantidade = produto->quantidade;
             current->produto->preco = produto->preco;
-
-            ListaParamAdicionalProduto* paramProduto = produto->parametros; // pegar no primeiro parâmetro
-            while (paramProduto != NULL) { // enquanto houver parâmetros
-                ParamAdicionalProduto* currentParam = obterParametroAdicionalPorID(current->produto, paramProduto->parametro->id); // obter o parâmetro atual
-                if (currentParam != NULL) { // se o parâmetro existir
-                    strncpy(currentParam->nome, paramProduto->parametro->nome, sizeof(currentParam->nome)); // copiar o nome do parâmetro
-                    strncpy(currentParam->valor, paramProduto->parametro->valor, sizeof(currentParam->valor)); // copiar o valor do parâmetro
-                } else { // se o parâmetro não existir
-                    // criar um parâmetro e adicionar ao produto
-                    ParamAdicionalProduto* newParam = criarParametroAdicionalProduto(paramProduto->parametro->nome, paramProduto->parametro->valor);
-                    adicionarParametroAdicionalProduto(current->produto, newParam);
-                    free(newParam);
-                }
-                paramProduto = paramProduto->prox_parametro; // avançar para o próximo parâmetro
-            }
-
+            current->produto->num_parametros = getNumeroParametrosAdicionais(produto->parametros);
+            current->produto->parametros = produto->parametros;
             return 0; // Produto atualizado
         }
         current = current->prox_produto;
@@ -476,44 +489,6 @@ int adicionarListaParametroAdicionalProduto(Produto* produto, ListaParamAdiciona
     return 0; // sucesso
 }
 
-// Remove um parâmetro adicional de uma lista de parâmetros adicionais de produtos
-// Utiliza a lista de parâmetros adicionais de produtos como pointer e o código do parâmetro a remover
-// Não é usada
-int removerParametroAdicionalProduto(Produto* produto, unsigned int codigoParametro) {
-    ListaParamAdicionalProduto* temp = produto->parametros;
-    ListaParamAdicionalProduto* prev = NULL;
-
-    while (temp != NULL && temp->parametro->id != codigoParametro) {
-        prev = temp;
-        temp = temp->prox_parametro;
-    }
-    if (temp == NULL) return 0;
-
-    if (prev == NULL) {
-        produto->parametros = temp->prox_parametro;
-    } else {
-        prev->prox_parametro = temp->prox_parametro;
-    }
-
-    free(temp);
-    return 1;
-}
-
-// Atualiza um parâmetro adicional de uma lista de parâmetros adicionais de produtos
-// Utiliza o produto como pointer e o parâmetro a atualizar como pointer
-// Não é usada
-int atualizarParametroAdicional(Produto* produto, ParamAdicionalProduto* parametro) {
-    ListaParamAdicionalProduto* current = produto->parametros;
-    while (current != NULL) {
-        if (current->parametro->id == parametro->id) {
-            strncpy(current->parametro->nome, parametro->nome, sizeof(current->parametro->nome));
-            strncpy(current->parametro->valor, parametro->valor, sizeof(current->parametro->valor));
-            return 0;
-        }
-        current = current->prox_parametro;
-    }
-    return 1;
-}
 
 // Adiciona um parâmetro adicional a uma lista de parâmetros adicionais de produtos
 // Utiliza a lista de parâmetros adicionais do produto como pointer e o parâmetro a adicionar como pointer
@@ -608,6 +583,20 @@ unsigned int getNumeroProdutosLinha(LinhaProdutos* linha) {
 
     unsigned int count = 0; // inicializar a contagem a 0
     ListaProdutos* current = linha->lista_produtos; // pegar no primeiro produto
+    while (current != NULL) { // enquanto houver produtos
+        count++; // incrementar a contagem
+        current = (ListaProdutos *) current->prox_produto; // avançar para o próximo produto
+    }
+
+    return count; // retornar a contagem
+}
+
+// Retorna o número de produtos numa dada lista de produtos
+unsigned int getNumeroProdutosLista(ListaProdutos* lista) {
+    if (lista == NULL) return 0; // se a lista não for encontrada, retornar 0
+
+    unsigned int count = 0; // inicializar a contagem a 0
+    ListaProdutos* current = lista; // pegar no primeiro produto
     while (current != NULL) { // enquanto houver produtos
         count++; // incrementar a contagem
         current = (ListaProdutos *) current->prox_produto; // avançar para o próximo produto
@@ -762,4 +751,112 @@ void mergeSort(ListaProdutos** headRef) {
     *headRef = sorted;
 }
 
+
+////
+// Pesquisa
+////
+
+// procura por nome de produto
+//// JÁ DEFINIDA EM procurarStockPorNomeProduto
+// procura por modelo de produto (apresenta Lista de produtos)
+ListaProdutos* procurarStockPorModeloProduto(StockLoja* stock, char* modelo) {
+    if (stock == NULL) return NULL; // se o stock não for encontrado, retornar NULL
+    if (stock->lista_linhas == NULL) return NULL; // se não houver linhas, retornar NULL
+    if (strlen(modelo) == 0) return NULL; // se o modelo for vazio, retornar NULL
+    if (stock->num_linhas == 0) return NULL; // se não houver linhas, retornar NULL
+
+    ListaLinhaProdutos* currentLinha = stock->lista_linhas; // pegar na primeira linha
+    ListaProdutos* produtos = NULL; // inicializar a lista de produtos a NULL
+
+    while (currentLinha != NULL) { // enquanto houver linhas
+        ListaProdutos* currentProduto = currentLinha->linha->lista_produtos; // pegar no primeiro produto da linha
+        if (currentProduto == NULL) { // se não houver produtos
+            currentLinha = currentLinha->prox_linha; // avançar para a próxima linha
+            continue;
+        }
+        while (currentProduto != NULL) { // enquanto houver produtos
+            if (strcmp(currentProduto->produto->modelo, modelo) == 0) { // se o modelo do produto for igual ao modelo fornecido
+                ListaProdutos* newProduto = (ListaProdutos*) malloc(sizeof(ListaProdutos)); // alocar memória para o novo produto
+                if (newProduto == NULL) return NULL; // se houver problema com a alocação de memória, retornar NULL
+                newProduto->produto = currentProduto->produto; // copiar o produto para a lista a retornar
+                newProduto->prox_produto = produtos; // apontar para a lista de produtos atual
+                produtos = newProduto; // apontar para o novo produto
+            }
+            currentProduto = currentProduto->prox_produto; // avançar para o próximo produto
+        }
+        currentLinha = currentLinha->prox_linha; // avançar para a próxima linha
+    }
+
+    return produtos; // retornar a lista de produtos
+}
+
+// procura por categoria de produto (apresenta Lista de produtos)
+ListaProdutos* procurarStockPorItemProduto(StockLoja* stock, char* item) {
+    if (stock == NULL) return NULL; // se o stock não for encontrado, retornar NULL
+    if (stock->lista_linhas == NULL) return NULL; // se não houver linhas, retornar NULL
+    if (strlen(item) == 0) return NULL; // se o item for vazio, retornar NULL
+    if (stock->num_linhas == 0) return NULL; // se não houver linhas, retornar NULL
+
+    ListaLinhaProdutos* currentLinha = stock->lista_linhas; // pegar na primeira linha
+    ListaProdutos* produtos = NULL; // inicializar a lista de produtos a NULL
+
+    while (currentLinha != NULL) { // enquanto houver linhas
+        ListaProdutos* currentProduto = currentLinha->linha->lista_produtos; // pegar no primeiro produto da linha
+        if (currentProduto == NULL) { // se não houver produtos
+            currentLinha = currentLinha->prox_linha; // avançar para a próxima linha
+            continue;
+        }
+        while (currentProduto != NULL) { // enquanto houver produtos
+            if (strcmp(currentProduto->produto->item, item) == 0) { // se o item do produto for igual ao item fornecido
+                ListaProdutos* newProduto = (ListaProdutos*) malloc(sizeof(ListaProdutos)); // alocar memória para o novo produto
+                if (newProduto == NULL) return NULL; // se houver problema com a alocação de memória, retornar NULL
+                newProduto->produto = currentProduto->produto; // copiar o produto para a lista a retornar
+                newProduto->prox_produto = produtos; // apontar para a lista de produtos atual
+                produtos = newProduto; // apontar para o novo produto
+            }
+            currentProduto = currentProduto->prox_produto; // avançar para o próximo produto
+        }
+        currentLinha = currentLinha->prox_linha; // avançar para a próxima linha
+    }
+
+    return produtos; // retornar a lista de produtos
+}
+
+// procura por parametro de produto (apresenta Lista de produtos)
+ListaProdutos* procurarStockPorParametroProduto(StockLoja* stock, char* parametro) {
+    if (stock == NULL) return NULL; // se o stock não for encontrado, retornar NULL
+    if (stock->lista_linhas == NULL) return NULL; // se não houver linhas, retornar NULL
+    if (strlen(parametro) == 0) return NULL; // se o parametro for vazio, retornar NULL
+    if (stock->num_linhas == 0) return NULL; // se não houver linhas, retornar NULL
+
+    ListaLinhaProdutos* currentLinha = stock->lista_linhas; // pegar na primeira linha
+    ListaProdutos* produtos = NULL; // inicializar a lista de produtos a NULL
+
+    while (currentLinha != NULL) { // enquanto houver linhas
+        ListaProdutos *currentProduto = currentLinha->linha->lista_produtos; // pegar no primeiro produto da linha
+        if (currentProduto == NULL) { // se não houver produtos
+            currentLinha = currentLinha->prox_linha; // avançar para a próxima linha
+            continue;
+        }
+        while (currentProduto != NULL) { // enquanto houver produtos
+            ListaParamAdicionalProduto *currentParam = currentProduto->produto->parametros; // pegar no primeiro parâmetro
+            while (currentParam != NULL) { // enquanto houver parâmetros
+                if (strcmp(currentParam->parametro->nome, parametro) ==
+                    0) { // se o nome do parâmetro for igual ao parâmetro fornecido
+                    ListaProdutos *newProduto = (ListaProdutos *) malloc(sizeof(ListaProdutos)); // alocar memória para o novo produto
+                    if (newProduto == NULL) return NULL; // se houver problema com a alocação de memória, retornar NULL
+                    newProduto->produto = currentProduto->produto; // copiar o produto para a lista a retornar
+                    newProduto->prox_produto = produtos; // apontar para a lista de produtos atual
+                    produtos = newProduto; // apontar para o novo produto
+                    break; // parar
+                }
+                currentParam = currentParam->prox_parametro; // avançar para o próximo parâmetro
+            }
+            currentProduto = currentProduto->prox_produto; // avançar para o próximo
+        }
+        currentLinha = currentLinha->prox_linha; // avançar para a próxima linha
+    }
+
+    return produtos; // retornar a lista de produtos
+}
 

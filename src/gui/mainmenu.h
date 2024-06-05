@@ -53,7 +53,7 @@ public:
     void tabDefinicoes();
     void reloadTabs();
 
-    int criarWarningMessageBox(const QString &title, const QString &text, int mode);
+    static int criarWarningMessageBox(const QString &title, const QString &text, int mode);
 
     ~MainMenu() override;
 

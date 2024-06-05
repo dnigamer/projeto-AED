@@ -10,20 +10,19 @@ int stockSaved = 0;
 int selLinha = 0, selProduto = 0, selModelo = 0;
 
 void MainMenu::newDB() {
-    int res = criarWarningMessageBox("Atenção", "Deseja criar uma nova base de dados?", 1);
-    if (res == QMessageBox::Yes) {
-        stock = criarStockLoja("");
-        setStock(stock);
-        reloadTabs();
-        ui->statusbar->showMessage("Nova base de dados criada com sucesso!");
-    }
+    char *stockName = new char[1];
+    stock = criarStockLoja(stockName);
+    setStock(stock);
+    reloadTabs();
+    ui->statusbar->showMessage("Nova base de dados criada com sucesso!");
 }
 
 void MainMenu::openDB() {
     QString filename = QFileDialog::getOpenFileName(this, "Abrir base de dados", "", "JSON Files (*.json)");
     if (filename.isEmpty()) return;
 
-    stock = criarStockLoja("");
+    char *stockName = new char[1];
+    stock = criarStockLoja(stockName);
 
     int resultado = carregarStock(stock, filename.toStdString().c_str());
     if (resultado == 1) {
@@ -34,8 +33,10 @@ void MainMenu::openDB() {
         return;
     }
 
+    setWindowTitle("Gestão de Stock - " + QString(stock->nome));
     setStock(stock);
     reloadTabs();
+
     ui->statusbar->showMessage("Base de dados aberta com sucesso!");
 }
 
@@ -260,7 +261,8 @@ void MainMenu::setModeloInfo(Produto *ptr) {
     ListaParamAdicionalProduto* current = ptr->parametros;
     int numparametros = static_cast<int>(getNumeroParametrosAdicionais(current));
 
-    for (int i = 0; i < numparametros; i++) {
+    // do parameters backwards
+    for (int i = numparametros - 1; i >= 0; i--) {
         ParamAdicionalProduto param = *current->parametro;
         ui->outrosParamTV->setItem(i, 0, new QTableWidgetItem(QString::fromStdString(param.nome)));
         ui->outrosParamTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(param.valor)));
@@ -292,6 +294,12 @@ void MainMenu::reloadTabs() {
     } else if (ui->tabWidget->currentIndex() == 1) { // pesquisa
         ui->procuraTE->clear();
         ui->resultPesqTV->clear();
+        ui->resultPesqTV->setRowCount(0);
+        ui->resultPesqTV->setColumnCount(8);
+        ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Código Interno" << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço" << "Número de parâmetros");
+        for (int j = 0; j < 8; j++) {
+            ui->resultPesqTV->resizeColumnToContents(j);
+        }
     } else if (ui->tabWidget->currentIndex() == 2) { // definições
         tabDefinicoes();
     }
@@ -309,11 +317,20 @@ void MainMenu::onLinhasLVClicked(const QModelIndex &index) {
 // Função para mostrar os modelos na terceira ListView baseado no produto selecionado na segunda ListView
 void MainMenu::onProdutosLVClicked(const QModelIndex &index) {
     selProduto = index.row();
+    QModelIndex indexLinha = ui->linhasLV->currentIndex();
+
     QAbstractItemModel* model = ui->produtosLV->model();
-    QString text = model->data(index, Qt::DisplayRole).toString();
-    std::string nomeStd = text.toStdString();
-    char* nome = const_cast<char*>(nomeStd.c_str());
-    auto lista = (ListaProdutos *) procurarStockPorNomeProduto(stock, nome);
+    QString produtoText = model->data(index, Qt::DisplayRole).toString();
+    std::string produtoStd = produtoText.toStdString();
+    char* produto = const_cast<char*>(produtoStd.c_str());
+
+    auto linhaText = ui->linhasLV->model()->data(indexLinha, Qt::DisplayRole).toString();
+    std::string linhaTextStd = linhaText.toStdString();
+    char* nomeLinha = const_cast<char*>(linhaTextStd.c_str());
+
+    auto linha = (LinhaProdutos *) obterLinhaProdutosPorNome(stock, nomeLinha);
+    auto lista = (ListaProdutos *) obterListaProdutosPorItemLinha(linha, produto);
+
     setModelos(lista);
     setModeloInfo(nullptr);
 }
@@ -591,13 +608,15 @@ void MainMenu::onRemoverProdutoBtnClicked() {
     }
 
     setProdutos(obterLinhaProdutosPorNome(stock, nomeLinhaChar));
-    setModelos(obterListaProdutosPorIDLinha(stock, selLinha + 1));
+    setModelos(nullptr);
     setModeloInfo(nullptr);
 
     ui->statusbar->showMessage("Produto removido com sucesso!");
 }
 
 void MainMenu::onAtualizarProdutoBtnClicked() {
+    QModelIndex selecProduto = ui->produtosLV->currentIndex();
+
     if (ui->linhasLV->currentIndex().row() == -1) {
         criarWarningMessageBox("ERRO!!", "Selecione uma linha de produtos para atualizar um produto.", 0);
         return;
@@ -702,8 +721,16 @@ void MainMenu::onAtualizarProdutoBtnClicked() {
         }
 
         setProdutos(obterLinhaProdutosPorNome(stock, nomeLinhaChar));
-        setModelos(obterListaProdutosPorIDLinha(stock, selLinha + 1));
+
+        auto linhaAnt = (LinhaProdutos *) obterLinhaProdutosPorNome(stock, nomeLinhaChar);
+        std::string nomeProduto = ui->produtosLV->model()->data(selecProduto, Qt::DisplayRole).toString().toStdString();
+        char* nomeProdutoChar = const_cast<char*>(nomeProduto.c_str());
+
+        auto lista = (ListaProdutos *) obterListaProdutosPorItemLinha(linhaAnt, nomeProdutoChar);
+        setModelos(lista);
+        ui->produtosLV->setCurrentIndex(selecProduto);
         setModeloInfo(nullptr);
+
         ui->statusbar->showMessage("Produto atualizado com sucesso!");
     }
 }
@@ -731,13 +758,7 @@ void MainMenu::onAtualizarStockInfoBtnClicked() {
 
 // Função para apagar todas as linhas de produtos do stock
 void MainMenu::onApagaLinhasStockBtnClicked() {
-    QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setText("Tem a certeza que deseja apagar todas as linhas de stock?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-    int ret = msgBox.exec();
+    int ret = criarWarningMessageBox("Confirmação", "Tem a certeza que deseja apagar todas as linhas de stock?", 1);
     if (ret == QMessageBox::No) return;
     apagarLinhasProdutos(stock);
     tabDefinicoes();
@@ -746,161 +767,286 @@ void MainMenu::onApagaLinhasStockBtnClicked() {
 
 // Função para apagar todos os produtos do stock
 void MainMenu::onApagaProdutosStockBtnClicked() {
-    QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setText("Tem a certeza que deseja apagar todos os produtos do stock?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-    int ret = msgBox.exec();
+    int ret = criarWarningMessageBox("Confirmação", "Tem a certeza que deseja apagar todos os produtos do stock? Linhas serão mantidas.", 1);
     if (ret == QMessageBox::No) return;
     apagarProdutosLinhasStock(stock);
     tabDefinicoes();
     ui->statusbar->showMessage("Produtos de stock apagados. Linhas foram mantidas.");
 }
 
+/// TAB PESQUISA
+// Função para pesquisa
 void MainMenu::onProcuraBtnClicked() {
     QString procura = ui->procuraTE->text();
     if (procura.isEmpty()) {
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText("Erro! Campo de pesquisa vazio.");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-        msgBox.exec();
+        criarWarningMessageBox("ERRO!!", "Campo de pesquisa vazio.", 0);
         return;
     }
 
     int choice = ui->catPesqDD->currentIndex();
-    // 1-codigo, 2-nome, 3-modelo, 4-categoria, 5-parametros, 6-lista
     switch (choice) {
         case 0: {
-            // separate the line and product ID
             QStringList parts = procura.split(".");
-            if (parts.size() != 2) {
-                QMessageBox msgBox;
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setText("Erro! Formato de pesquisa inválido.");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-                msgBox.exec();
+            if (parts.size() > 2) {
+                criarWarningMessageBox("ERRO!!", "Código inválido.", 0);
                 return;
             }
 
-            LinhaProdutos *linha = obterLinhaProdutosPorID(stock, parts[0].toInt());
-            if (linha == nullptr) {
-                QMessageBox msgBox;
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setText("Linha de produtos não encontrada.");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-                msgBox.exec();
-                return;
-            }
+            if (parts.size() == 1 && parts[0].toInt() != 0) {
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, parts[0].toInt());
+                if (linha == nullptr) {
+                    criarWarningMessageBox("ERRO!!", "Linha não encontrada.", 0);
+                    return;
+                }
 
-            Produto *produto = obterProdutoPorID(linha, parts[1].toInt());
-            if (produto == nullptr) {
-                QMessageBox msgBox;
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setText("Produto não encontrado.");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-                msgBox.exec();
+                ui->resultPesqTV->setRowCount(static_cast<int>(linha->num_produtos));
+                ui->resultPesqTV->setColumnCount(8);
+                ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Código interno" << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço" << "Número de parâmetros");
+
+                int i = 0;
+                for (ListaProdutos *current = linha->lista_produtos; current; current = current->prox_produto) {
+                    Produto produto = *current->produto;
+                    ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
+                    ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
+                    ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));
+                    ui->resultPesqTV->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(produto.modelo)));
+                    ui->resultPesqTV->setItem(i, 4, new QTableWidgetItem(QString::fromStdString(produto.item)));
+                    ui->resultPesqTV->setItem(i, 5, new QTableWidgetItem(QString::number(produto.quantidade)));
+                    ui->resultPesqTV->setItem(i, 6, new QTableWidgetItem(QString::number(produto.preco).replace('.',',') + " €"));
+                    ui->resultPesqTV->setItem(i, 7, new QTableWidgetItem(QString::number(produto.num_parametros)));
+                    i++;
+                }
+                for (int j = 0; j < 8; j++) {
+                    ui->resultPesqTV->resizeColumnToContents(j);
+                }
+                return;
+            } else if (parts.size() == 2 && parts[1].toInt() != 0 && parts[0].toInt() != 0) {
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, parts[0].toInt());
+                if (linha == nullptr) {
+                    QMessageBox msgBox;
+                    criarWarningMessageBox("ERRO!!", "Linha não encontrada.", 0);
+                    return;
+                }
+
+                Produto *produto = obterProdutoPorID(linha, parts[1].toInt());
+                if (produto == nullptr) {
+                    criarWarningMessageBox("ERRO!!", "Produto não encontrado.", 0);
+                    return;
+                }
+
+                ui->resultPesqTV->setRowCount(1);
+                ui->resultPesqTV->setColumnCount(8);
+                ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Código Interno" << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço" << "Número de parâmetros");
+                ui->resultPesqTV->setItem(0, 0, new QTableWidgetItem(QString::number(produto->linhaID) + "." + QString::number(produto->produtoID)));
+                ui->resultPesqTV->setItem(0, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
+                ui->resultPesqTV->setItem(0, 2, new QTableWidgetItem(QString::fromStdString(produto->nome)));
+                ui->resultPesqTV->setItem(0, 3, new QTableWidgetItem(QString::fromStdString(produto->modelo)));
+                ui->resultPesqTV->setItem(0, 4, new QTableWidgetItem(QString::fromStdString(produto->item)));
+                ui->resultPesqTV->setItem(0, 5, new QTableWidgetItem(QString::number(produto->quantidade)));
+                ui->resultPesqTV->setItem(0, 6, new QTableWidgetItem(QString::number(produto->preco).replace('.',',') + " €"));
+                ui->resultPesqTV->setItem(0, 7, new QTableWidgetItem(QString::number(produto->num_parametros)));
+                for (int j = 0; j < 8; j++) {
+                    ui->resultPesqTV->resizeColumnToContents(j);
+                }
+                return;
+            } else {
+                criarWarningMessageBox("ERRO!!", "Código inválido.", 0);
                 return;
             }
-            // fill the table widget with the product info
-            ui->resultPesqTV->setRowCount(1);
-            ui->resultPesqTV->setColumnCount(6);
-            ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço");
-            ui->resultPesqTV->setItem(0, 0, new QTableWidgetItem(QString::number(produto->linhaID)));
-            ui->resultPesqTV->setItem(0, 1, new QTableWidgetItem(QString::fromStdString(produto->nome)));
-            ui->resultPesqTV->setItem(0, 2, new QTableWidgetItem(QString::fromStdString(produto->modelo)));
-            ui->resultPesqTV->setItem(0, 3, new QTableWidgetItem(QString::fromStdString(produto->item)));
-            ui->resultPesqTV->setItem(0, 4, new QTableWidgetItem(QString::number(produto->quantidade)));
-            ui->resultPesqTV->setItem(0, 5, new QTableWidgetItem(QString::number(produto->preco).replace('.',',') + " €"));
-            break;
         }
         case 1: {
-            char* nome = const_cast<char *>(procura.toStdString().c_str());
+            std::string nomeStd = procura.toStdString();
+            char* nomeParamChar = const_cast<char*>(nomeStd.c_str());
 
-            ListaProdutos *listaDoProduto = procurarStockPorNomeProduto(stock, nome);
-            if (listaDoProduto == nullptr) {
-                QMessageBox msgBox;
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setText("Produto não encontrado.");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-                msgBox.exec();
+            if (procura.isEmpty()) {
+                criarWarningMessageBox("ERRO!!", "Campo de pesquisa vazio.", 0);
                 return;
             }
 
-            //setModeloInfo(produto);
-            break;
+            ListaProdutos *lista = procurarStockPorNomeProduto(stock, nomeParamChar);
+            if (lista == nullptr) {
+                criarWarningMessageBox("ERRO!!", "Produto não encontrado.", 0);
+                return;
+            }
+
+            ui->resultPesqTV->setRowCount(static_cast<int>(getNumeroProdutosLista(lista)));
+            ui->resultPesqTV->setColumnCount(8);
+            ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Código Interno" << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço" << "Número de parâmetros");
+            int i = 0;
+            for (ListaProdutos *current = lista; current; current = current->prox_produto) {
+                Produto produto = *current->produto;
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, produto.linhaID);
+                ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
+                ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
+                ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));
+                ui->resultPesqTV->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(produto.modelo)));
+                ui->resultPesqTV->setItem(i, 4, new QTableWidgetItem(QString::fromStdString(produto.item)));
+                ui->resultPesqTV->setItem(i, 5, new QTableWidgetItem(QString::number(produto.quantidade)));
+                ui->resultPesqTV->setItem(i, 6, new QTableWidgetItem(QString::number(produto.preco).replace('.',',') + " €"));
+                ui->resultPesqTV->setItem(i, 7, new QTableWidgetItem(QString::number(produto.num_parametros)));
+                i++;
+            }
+            for (int j = 0; j < 8; j++) {
+                ui->resultPesqTV->resizeColumnToContents(j);
+            }
+
+            return;
         }
         case 2: {
-            /*Produto *produto = procurarProdutoPorModelo(stock, procura.toStdString().c_str());
-            if (produto == nullptr) {
-                QMessageBox msgBox;
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setText("Produto não encontrado.");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-                msgBox.exec();
+            std::string modeloStd = procura.toStdString();
+            char* modeloParamChar = const_cast<char*>(modeloStd.c_str());
+
+            if (procura.isEmpty()) {
+                criarWarningMessageBox("ERRO!!", "Campo de pesquisa vazio.", 0);
                 return;
             }
-            setModeloInfo(produto);*/
-            break;
+
+            ListaProdutos *lista = procurarStockPorModeloProduto(stock, modeloParamChar);
+            if (lista == nullptr) {
+                criarWarningMessageBox("ERRO!!", "Modelo não encontrado.", 0);
+                return;
+            }
+
+            ui->resultPesqTV->setRowCount(static_cast<int>(getNumeroProdutosLista(lista)));
+            ui->resultPesqTV->setColumnCount(8);
+            ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Código Interno" << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço" << "Número de parâmetros");
+            int i = 0;
+            for (ListaProdutos *current = lista; current; current = current->prox_produto) {
+                Produto produto = *current->produto;
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, produto.linhaID);
+                ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
+                ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
+                ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));
+                ui->resultPesqTV->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(produto.modelo)));
+                ui->resultPesqTV->setItem(i, 4, new QTableWidgetItem(QString::fromStdString(produto.item)));
+                ui->resultPesqTV->setItem(i, 5, new QTableWidgetItem(QString::number(produto.quantidade)));
+                ui->resultPesqTV->setItem(i, 6, new QTableWidgetItem(QString::number(produto.preco).replace('.',',') + " €"));
+                ui->resultPesqTV->setItem(i, 7, new QTableWidgetItem(QString::number(produto.num_parametros)));
+                i++;
+            }
+            for (int j = 0; j < 8; j++) {
+                ui->resultPesqTV->resizeColumnToContents(j);
+            }
+
+            return;
         }
         case 3: {
-            /*Produto *produto = procurarProdutoPorCategoria(stock, procura.toStdString().c_str());
-            if (produto == nullptr) {
-                QMessageBox msgBox;
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setText("Produto não encontrado.");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-                msgBox.exec();
+            std::string categoriaStd = procura.toStdString();
+            char* categoriaParamChar = const_cast<char*>(categoriaStd.c_str());
+
+            if (procura.isEmpty()) {
+                criarWarningMessageBox("ERRO!!", "Campo de pesquisa vazio.", 0);
                 return;
             }
-            setModeloInfo(produto);*/
-            break;
+
+            ListaProdutos *lista = procurarStockPorItemProduto(stock, categoriaParamChar);
+            if (lista == nullptr) {
+                criarWarningMessageBox("ERRO!!", "Categoria não encontrada.", 0);
+                return;
+            }
+
+            ui->resultPesqTV->setRowCount(static_cast<int>(getNumeroProdutosLista(lista)));
+            ui->resultPesqTV->setColumnCount(8);
+            ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Código Interno" << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço" << "Número de parâmetros");
+            int i = 0;
+            for (ListaProdutos *current = lista; current; current = current->prox_produto) {
+                Produto produto = *current->produto;
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, produto.linhaID);
+                ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
+                ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
+                ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));
+                ui->resultPesqTV->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(produto.modelo)));
+                ui->resultPesqTV->setItem(i, 4, new QTableWidgetItem(QString::fromStdString(produto.item)));
+                ui->resultPesqTV->setItem(i, 5, new QTableWidgetItem(QString::number(produto.quantidade)));
+                ui->resultPesqTV->setItem(i, 6, new QTableWidgetItem(QString::number(produto.preco).replace('.',',') + " €"));
+                ui->resultPesqTV->setItem(i, 7, new QTableWidgetItem(QString::number(produto.num_parametros)));
+                i++;
+            }
+            for (int j = 0; j < 8; j++) {
+                ui->resultPesqTV->resizeColumnToContents(j);
+            }
+
+            return;
         }
         case 4: {
-            /*Produto *produto = procurarProdutoPorParametro(stock, procura.toStdString().c_str());
-            if (produto == nullptr) {
-                QMessageBox msgBox;
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setText("Produto não encontrado.");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-                msgBox.exec();
+            std::string parametroStd = procura.toStdString();
+            char* parametroChar = const_cast<char*>(parametroStd.c_str());
+
+            if (procura.isEmpty()) {
+                criarWarningMessageBox("ERRO!!", "Campo de pesquisa vazio.", 0);
                 return;
             }
-            setModeloInfo(produto);*/
-            break;
+
+            ListaProdutos *lista = procurarStockPorParametroProduto(stock, parametroChar);
+            if (lista == nullptr) {
+                criarWarningMessageBox("ERRO!!", "Parâmetro não encontrado.", 0);
+                return;
+            }
+
+            ui->resultPesqTV->setRowCount(static_cast<int>(getNumeroProdutosLista(lista)));
+            ui->resultPesqTV->setColumnCount(8);
+            ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Código Interno" << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço" << "Número de parâmetros");
+            int i = 0;
+            for (ListaProdutos *current = lista; current; current = current->prox_produto) {
+                Produto produto = *current->produto;
+                LinhaProdutos *linha = obterLinhaProdutosPorID(stock, produto.linhaID);
+                ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
+                ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
+                ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));
+                ui->resultPesqTV->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(produto.modelo)));
+                ui->resultPesqTV->setItem(i, 4, new QTableWidgetItem(QString::fromStdString(produto.item)));
+                ui->resultPesqTV->setItem(i, 5, new QTableWidgetItem(QString::number(produto.quantidade)));
+                ui->resultPesqTV->setItem(i, 6, new QTableWidgetItem(QString::number(produto.preco).replace('.',',') + " €"));
+                ui->resultPesqTV->setItem(i, 7, new QTableWidgetItem(QString::number(produto.num_parametros)));
+                i++;
+            }
+            for (int j = 0; j < 8; j++) {
+                ui->resultPesqTV->resizeColumnToContents(j);
+            }
+
+            return;
         }
         case 5: {
-            /*LinhaProdutos *linha = procurarStockPorNomeProduto(stock, procura.toStdString().c_str());
-            if (linha == nullptr) {
-                QMessageBox msgBox;
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setText("Produto não encontrado.");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setStyleSheet("QMessageBox {icon-size: 64px;}");
-                msgBox.exec();
+            std::string linhaStd = procura.toStdString();
+            char* linhaChar = const_cast<char*>(linhaStd.c_str());
+
+            if (procura.isEmpty()) {
+                criarWarningMessageBox("ERRO!!", "Campo de pesquisa vazio.", 0);
                 return;
             }
-            setProdutos(linha);
-            setModelos(nullptr);
-            setModeloInfo(nullptr);*/
-            break;
+
+            LinhaProdutos *linha = obterLinhaProdutosPorNome(stock, linhaChar);
+            if (linha == nullptr) {
+                criarWarningMessageBox("ERRO!!", "Linha não encontrada.", 0);
+                return;
+            }
+
+            ui->resultPesqTV->setRowCount(static_cast<int>(linha->num_produtos));
+            ui->resultPesqTV->setColumnCount(8);
+            ui->resultPesqTV->setHorizontalHeaderLabels(QStringList() << "Código Interno" << "Linha" << "Nome" << "Modelo" << "Categoria" << "Quantidade" << "Preço" << "Número de parâmetros");
+            int i = 0;
+            for (ListaProdutos *current = linha->lista_produtos; current; current = current->prox_produto) {
+                Produto produto = *current->produto;
+                ui->resultPesqTV->setItem(i, 0, new QTableWidgetItem(QString::number(produto.linhaID) + "." + QString::number(produto.produtoID)));
+                ui->resultPesqTV->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(linha->nome)));
+                ui->resultPesqTV->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(produto.nome)));
+                ui->resultPesqTV->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(produto.modelo)));
+                ui->resultPesqTV->setItem(i, 4, new QTableWidgetItem(QString::fromStdString(produto.item)));
+                ui->resultPesqTV->setItem(i, 5, new QTableWidgetItem(QString::number(produto.quantidade)));
+                ui->resultPesqTV->setItem(i, 6, new QTableWidgetItem(QString::number(produto.preco).replace('.',',') + " €"));
+                ui->resultPesqTV->setItem(i, 7, new QTableWidgetItem(QString::number(produto.num_parametros)));
+                i++;
+            }
+            for (int j = 0; j < 8; j++) {
+                ui->resultPesqTV->resizeColumnToContents(j);
+            }
+
+            return;
         }
         default:
             break;
-
     }
     ui->statusbar->showMessage("Produto encontrado com sucesso!");
-
 }
 
 // Processamento de mudança de tab
