@@ -595,7 +595,7 @@ void MainMenu::onAdicionarProdutoBtnClicked() {
         }
 
         setProdutos(obterLinhaProdutosPorID(stock, selLinha + 1));
-        setModelos(obterListaProdutosPorIDLinha(stock, selLinha + 1));
+        setModelos(nullptr);
         setModeloInfo(nullptr);
 
         ui->statusbar->showMessage("Produto adicionado com sucesso!");
