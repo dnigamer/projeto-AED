@@ -340,15 +340,7 @@ int adicionarProduto(LinhaProdutos* linha, Produto* produto) {
     }
     novo_produto->linhaID = linha->linhaID; // ID da linha no produto é o ID da linha
     novo_produto->num_parametros = getNumeroParametrosAdicionais(produto->parametros); // número de parâmetros adicionais
-
-    ListaParamAdicionalProduto* current = produto->parametros; // pegar no primeiro parâmetro
-    while (current != NULL) { // enquanto houver parâmetros
-        ParamAdicionalProduto* novo_parametro = (ParamAdicionalProduto*) malloc(sizeof(ParamAdicionalProduto)); // alocar memória para o novo parâmetro
-        if (novo_parametro == NULL) return 1; // se houver problema com a alocação de memória, retornar 1
-        *novo_parametro = *current->parametro; // copiar o parâmetro para o novo parâmetro
-        adicionarParametroAdicionalProduto(novo_produto, novo_parametro); // adicionar o parâmetro ao novo produto
-        current = current->prox_parametro; // avançar para o próximo parâmetro
-    }
+    novo_produto->parametros = produto->parametros; // parâmetros adicionais
 
     novo_no->produto = novo_produto; // apontar para o novo produto
     novo_no->prox_produto = NULL; // apontar para NULL se for o primeiro produto
@@ -456,24 +448,30 @@ int adicionarParametroAdicionalProduto(Produto* produto, ParamAdicionalProduto* 
     ListaParamAdicionalProduto* novo_no = (ListaParamAdicionalProduto*) malloc(sizeof(ListaParamAdicionalProduto));
     if (novo_no == NULL) return 1; // se houver problema com a alocação de memória, retornar 1
 
-    ParamAdicionalProduto* novo_parametro = (ParamAdicionalProduto*) malloc(sizeof(ParamAdicionalProduto));
-    if (novo_parametro == NULL) return 1; // se houver problema com a alocação de memória, retornar 1
-
-    *novo_parametro = *parametro; // copiar o parâmetro para o novo parâmetro
     if (produto->parametros == NULL) {
-        novo_parametro->id = 1; // ID do parâmetro é 1 se não houver parâmetros
+        parametro->id = 1; // ID do parâmetro é 1 se não houver parâmetros
     } else {
-        novo_parametro->id = produto->parametros->parametro->id + 1; // ID do parâmetro é o ID do último parâmetro + 1
+        parametro->id = produto->parametros->parametro->id + 1; // ID do parâmetro é o ID do último parâmetro + 1
     }
 
-    novo_no->parametro = novo_parametro; // apontar para o novo parâmetro
-    novo_no->prox_parametro = NULL; // apontar para NULL se for o primeiro parâmetro
-    if (produto->parametros != NULL) { // se houver parâmetros
-        novo_no->prox_parametro = produto->parametros; // apontar para a lista de parâmetros atual
-    }
-
+    novo_no->parametro = parametro; // apontar para o novo parâmetro
+    novo_no->prox_parametro = produto->parametros; // apontar para a lista de parâmetros atual
     produto->parametros = novo_no; // apontar para o novo parâmetro
     produto->num_parametros++; // incrementar o número de parâmetros
+
+    return 0; // sucesso
+}
+
+// Adiciona uma lista de parâmetros adicionais a um produto
+int adicionarListaParametroAdicionalProduto(Produto* produto, ListaParamAdicionalProduto* parametros) {
+    if (produto == NULL) return 1; // se o produto não for encontrado, retornar 1
+    if (parametros == NULL) return 1; // se a lista de parâmetros não for encontrada, retornar 1
+
+    ListaParamAdicionalProduto* current = parametros; // pegar no primeiro parâmetro
+    while (current != NULL) { // enquanto houver parâmetros
+        adicionarParametroAdicionalProduto(produto, current->parametro); // adicionar o parâmetro ao produto
+        current = current->prox_parametro; // avançar para o próximo parâmetro
+    }
 
     return 0; // sucesso
 }

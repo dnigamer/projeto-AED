@@ -77,6 +77,8 @@ ListaParamAdicionalProduto* criarListaParamAdicionaisProduto();
 ParamAdicionalProduto* criarParametroAdicionalProduto(char* nome, char* valor);
 // adiciona um parâmetro adicional a uma lista de parâmetros adicionais de produtos
 int adicionarParametroAdicionalProduto(Produto* produto, ParamAdicionalProduto* parametro);
+// adiciona uma lista de parâmetros adicionais a um produto
+int adicionarListaParametroAdicionalProduto(Produto* produto, ListaParamAdicionalProduto* parametros);
 // N/U remove um parâmetro adicional de uma lista de parâmetros adicionais de produtos
 int removerParametroAdicionalProduto(Produto* produto, unsigned int codigoParametro);
 // N/U procura por um parâmetro adicional numa lista de parâmetros adicionais de produtos por ID
